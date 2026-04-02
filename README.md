@@ -1,8 +1,8 @@
 # luduvo-rs
 
-![Crates.io License](https://img.shields.io/crates/l/luduvo-rs)
-![Crates.io Version](https://img.shields.io/crates/v/luduvo-rs)
-![GitHub Repo stars](https://img.shields.io/github/stars/Primiti-ve/luduvo-rs)
+![docs status](https://img.shields.io/docsrs/luduvo-rs)
+![version](https://img.shields.io/crates/v/luduvo-rs)
+![license](https://img.shields.io/crates/l/luduvo-rs)
 
 *luduvo-rs* is a rust library for interacting with the [luduvo](luduvo.com) api.
 
