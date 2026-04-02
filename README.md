@@ -2,6 +2,11 @@
 
 *luduvo-rs* is a rust library for interacting with the [luduvo](luduvo.com) api.
 
+## disclaimers
+
+- this crate is a completely fanmade wrapper around the luduvo api.
+- i'm not good at rust; all contributions (pull requests, issues) are welcomed!
+
 ## features
 
 - user profiles (friends coming soon:tm:)
@@ -11,14 +16,10 @@
 ```rust
 use luduvo_rs::users::profile::ProfileWrapper;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let mut wrapper = ProfileWrapper::new(None);
-    let id = "1";
-    
-    let profile = wrapper.get_profile(id).await;
 
-    match profile {
+    match wrapper.get_profile("1") {
         Ok(profile) => {
             println!("{:#?}", profile);
         },
@@ -29,11 +30,6 @@ async fn main() {
     }
 }
 ```
-
-## disclaimers
-
-- this crate is a completely fanmade wrapper around the luduvo api.
-- i'm not good at rust; all contributions (pull requests, issues) are welcomed!
 
 ## need help?
 

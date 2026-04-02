@@ -1,4 +1,4 @@
-use reqwest::Client;
+use reqwest::blocking::Client;
 use serde::Deserialize;
 use std::{
     collections::HashMap,
@@ -251,6 +251,10 @@ impl ProfileWrapper {
     }
 
     /// fetch a user profile by its id.
+    /// 
+    /// # disclaimers
+    /// 
+    /// - this function is blocking!!!!! i think!!!
     ///
     /// # arguments
     ///
@@ -268,12 +272,10 @@ impl ProfileWrapper {
     /// ```no_run
     /// use luduvo_rs::users::profile::ProfileWrapper;
     ///
-    /// #[tokio::main]
-    /// async fn main() {
+    /// fn main() {
     ///     let mut wrapper = ProfileWrapper::new(None);
-    ///     let profile = wrapper.get_profile("1").await;
     ///
-    ///     match profile {
+    ///     match wrapper.get_profile("1") {
     ///         Ok(profile) => {
     ///             println!("{:#?}", profile);
     ///         },
@@ -284,7 +286,7 @@ impl ProfileWrapper {
     ///     }
     /// }
     /// ```
-    pub async fn get_profile(&mut self, id: &str) -> Result<Profile, ProfileError> {
+    pub fn get_profile(&mut self, id: &str) -> Result<Profile, ProfileError> {
         let id_num: u64 = id
             .parse()
             .map_err(|_| ProfileError::InvalidId(id.to_string()))?;
@@ -298,14 +300,14 @@ impl ProfileWrapper {
         }
 
         let url = format!("{}/{}/profile", BASE_URL, id);
-        let response = self.client.get(&url).send().await?;
+        let response = self.client.get(&url).send()?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
             return Err(ProfileError::ProfileNotFound(id.to_string()));
         }
 
         let response = response.error_for_status()?;
-        let profile = response.json::<Profile>().await?;
+        let profile = response.json::<Profile>()?;
 
         {
             let mut cache = &mut self.cache;

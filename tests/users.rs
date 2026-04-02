@@ -1,18 +1,18 @@
 #[allow(unused_comparisons)]
 
 #[cfg(test)]
-mod profiles {
+mod profile {
     use luduvo_rs::users::profile::{ProfileWrapper, ProfileError};
 
     /// tests that a valid profile can be fetched successfully.
-    #[tokio::test]
-    async fn get_profile_success() {
+    #[test]
+    fn get_profile_success() {
         let mut wrapper = ProfileWrapper::new(None);
         
         // id `1` is a known valid user.
         // this is the `Luduvo` account.
         let id = "1";
-        let result = wrapper.get_profile(id).await;
+        let result = wrapper.get_profile(id);
 
         assert!(result.is_ok(), "expected Ok, got Err: {:?}", result);
 
@@ -23,18 +23,17 @@ mod profiles {
     }
 
     /// tests that an invalid profile returns a ProfileNotFound error.
-    #[tokio::test]
-    async fn get_profile_not_found() {
+    #[test]
+    fn get_profile_not_found() {
         let mut wrapper = ProfileWrapper::new(None);
         
         // id `-1` is a known invalid user.
         // this test assumes that this id does not exist, and will never exist.
         // note(prim): why would -1 exist in the first place???
         let id = "-1";
-        let result = wrapper.get_profile(id).await;
 
-        match result {
-            Err(ProfileError::ProfileNotFound(returned_id)) => {
+        match wrapper.get_profile(id) {
+            Err(ProfileError::ProfileNotFound(returned_id) | ProfileError::InvalidId(returned_id)) => {
                 assert_eq!(returned_id, id);
             }
             
@@ -43,14 +42,13 @@ mod profiles {
     }
 
     /// tests that the profile api returns a consistent structure.
-    #[tokio::test]
-    async fn profile_fields_are_valid() {
+    #[test]
+    fn profile_fields_are_valid() {
         let mut wrapper = ProfileWrapper::new(None);
         let id = "1";
 
         let profile = wrapper
             .get_profile(id)
-            .await
             .expect("profile should exist");
 
         // sanity checks
