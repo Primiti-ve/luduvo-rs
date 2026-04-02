@@ -15,7 +15,8 @@
 
 ## features
 
-- user profiles (friends coming soon:tm:)
+- user profile data
+- user friends data
 
 ## example
 

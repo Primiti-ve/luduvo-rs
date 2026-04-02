@@ -1,5 +1,9 @@
 /// user api stuff!
 /// 
-/// mainly just the `profile` endpoint. however, the `friends` endpoint is coming soon!
+/// # endpoints
+/// 
+/// - profile (`/users/{id}/profile`)
+/// - friends (`/users/{id}/friends`)
 
 pub mod profile;
+pub mod friends;

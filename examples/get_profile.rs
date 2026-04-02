@@ -4,7 +4,7 @@ use luduvo_rs::users::profile::ProfileWrapper;
 async fn main() {
     let mut wrapper = ProfileWrapper::new(None);
 
-    match wrapper.get_profile("25").await {
+    match wrapper.get_profile("1").await {
         Ok(profile) => {
             println!("{:#?}", profile);
         }

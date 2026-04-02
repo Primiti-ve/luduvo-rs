@@ -89,7 +89,9 @@ pub struct Profile {
     pub last_active: Option<u64>,
 
     /// account creation timestamp (in unix seconds).
-    pub member_since: u64,
+    /// 
+    /// this is a `None` in just id `1`s case
+    pub member_since: Option<u64>,
 
     /// whether others are allowed to join this user.
     pub allow_joins: bool,
@@ -199,6 +201,7 @@ impl ProfileCache {
 pub struct ProfileWrapper {
     client: Client,
     cache: ProfileCache,
+    base_url: String,
 }
 
 impl ProfileWrapper {
@@ -223,6 +226,7 @@ impl ProfileWrapper {
         Self {
             client: Client::new(),
             cache,
+            base_url: BASE_URL.to_string(),
         }
     }
 
@@ -244,7 +248,35 @@ impl ProfileWrapper {
         let cache_timeout = cache_timeout.unwrap_or(30);
         let cache = ProfileCache::new(cache_timeout);
 
-        Self { client, cache }
+        Self {
+            client,
+            cache,
+            base_url: BASE_URL.to_string(),
+        }
+    }
+
+    /// creates a new [`ProfileWrapper`] with a provided base url.
+    ///
+    /// # notes
+    ///
+    /// - the user is responsible for making sure the url follows the schema of the luduvo api.
+    ///
+    /// # arguments
+    ///
+    /// * `cache_timeout` - the cache timeout in seconds.
+    ///
+    /// # returns
+    ///
+    /// - a new [`ProfileWrapper`] instance if successful
+    pub fn new_with_base_url(cache_timeout: Option<u64>, base_url: String) -> Self {
+        let cache_timeout = cache_timeout.unwrap_or(30);
+        let cache = ProfileCache::new(cache_timeout);
+
+        Self {
+            client: Client::new(),
+            cache,
+            base_url,
+        }
     }
 
     /// fetch a user profile by its id.
@@ -295,7 +327,7 @@ impl ProfileWrapper {
             }
         }
 
-        let url = format!("{}/{}/profile", BASE_URL, id);
+        let url = format!("{}/{}/profile", self.base_url, id);
         let response = self.client.get(&url).send().await?;
 
         if response.status() == StatusCode::NOT_FOUND {
