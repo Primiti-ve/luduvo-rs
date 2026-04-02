@@ -2,14 +2,9 @@
 
 *luduvo-rs* is a rust library for interacting with the [luduvo](luduvo.com) api.
 
-## disclaimers
+## features
 
-- this crate is a completely fanmade wrapper around the luduvo api.
-- i'm not good at rust; all contributions (pull requests, issues) are welcomed!
-
-## need help?
-
-ping me in the [luduvo discord](https://discord.gg/luduvo) (my discord username is @primiti_ve) or [create an issue](https://github.com/Primiti-ve/luduvo-rs/issues)!
+- user profiles (friends coming soon:tm:)
 
 ## example
 
@@ -34,3 +29,12 @@ async fn main() {
     }
 }
 ```
+
+## disclaimers
+
+- this crate is a completely fanmade wrapper around the luduvo api.
+- i'm not good at rust; all contributions (pull requests, issues) are welcomed!
+
+## need help?
+
+ping me in the [luduvo discord](https://discord.gg/luduvo) (my discord username is @primiti_ve) or [create an issue](https://github.com/Primiti-ve/luduvo-rs/issues)!
