@@ -10,6 +10,8 @@
 
 - this crate is a completely fanmade wrapper around the luduvo api.
 - i'm not good at rust; all contributions (pull requests, issues) are welcomed!
+- you need an asynchronous runtime in order to use this.
+  - tokio is the intended runtime for this crate!
 
 ## features
 
@@ -17,20 +19,23 @@
 
 ## example
 
+the code snippet below is taken directly from `examples/get_profile.rs`!
+
 ```rust
 use luduvo_rs::users::profile::ProfileWrapper;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut wrapper = ProfileWrapper::new(None);
 
-    match wrapper.get_profile("1") {
+    match wrapper.get_profile("1").await {
         Ok(profile) => {
             println!("{:#?}", profile);
-        },
-        
+        }
+
         Err(e) => {
             eprintln!("error caught while attempting to get profile: '{}'", e);
-        },
+        }
     }
 }
 ```

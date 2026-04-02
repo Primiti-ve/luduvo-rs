@@ -4,14 +4,14 @@ mod profile {
     use luduvo_rs::users::profile::{ProfileError, ProfileWrapper};
 
     /// tests that a valid profile can be fetched successfully.
-    #[test]
-    fn get_profile_success() {
+    #[tokio::test]
+    async fn get_profile_success() {
         let mut wrapper = ProfileWrapper::new(None);
 
         // id `1` is a known valid user.
         // this is the `Luduvo` account.
         let id = "1";
-        let result = wrapper.get_profile(id);
+        let result = wrapper.get_profile(id).await;
 
         assert!(result.is_ok(), "expected Ok, got Err: {:?}", result);
 
@@ -22,8 +22,8 @@ mod profile {
     }
 
     /// tests that an invalid profile returns a ProfileNotFound error.
-    #[test]
-    fn get_profile_not_found() {
+    #[tokio::test]
+    async fn get_profile_not_found() {
         let mut wrapper = ProfileWrapper::new(None);
 
         // id `-1` is a known invalid user.
@@ -31,7 +31,7 @@ mod profile {
         // note(prim): why would -1 exist in the first place???
         let id = "-1";
 
-        match wrapper.get_profile(id) {
+        match wrapper.get_profile(id).await {
             Err(
                 ProfileError::ProfileNotFound(returned_id) | ProfileError::InvalidId(returned_id),
             ) => {
@@ -43,12 +43,12 @@ mod profile {
     }
 
     /// tests that the profile api returns a consistent structure.
-    #[test]
-    fn profile_fields_are_valid() {
+    #[tokio::test]
+    async fn profile_fields_are_valid() {
         let mut wrapper = ProfileWrapper::new(None);
         let id = "1";
 
-        let profile = wrapper.get_profile(id).expect("profile should exist");
+        let profile = wrapper.get_profile(id).await.expect("profile should exist");
 
         // sanity checks
         assert!(!profile.username.is_empty());
