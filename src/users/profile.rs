@@ -289,9 +289,7 @@ impl ProfileWrapper {
             .map_err(|_| ProfileError::InvalidId(id.to_string()))?;
 
         {
-            let mut cache = &mut self.cache;
-
-            if let Some(profile) = cache.get(id_num) {
+            if let Some(profile) = self.cache.get(id_num) {
                 return Ok(profile);
             }
         }
