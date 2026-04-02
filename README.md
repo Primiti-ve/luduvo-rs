@@ -44,5 +44,5 @@ async fn main() {
 ## need help?
 
 - ping me in the [luduvo discord](https://discord.gg/luduvo) (my discord username is @primiti_ve)
-- join the unofficial [luduvo dev community](https://discord.gg/FcjTvuWKRk) (i KNOW it's a shameless plug and i'm SORRY okay!!!!)
+- join the unofficial [luduvo dev community](https://discord.gg/FcjTvuWKRk)
 - create an issue (https://github.com/Primiti-ve/luduvo-rs/issues)
