@@ -1,14 +1,13 @@
 #[allow(unused_comparisons)]
-
 #[cfg(test)]
 mod profile {
-    use luduvo_rs::users::profile::{ProfileWrapper, ProfileError};
+    use luduvo_rs::users::profile::{ProfileError, ProfileWrapper};
 
     /// tests that a valid profile can be fetched successfully.
     #[test]
     fn get_profile_success() {
         let mut wrapper = ProfileWrapper::new(None);
-        
+
         // id `1` is a known valid user.
         // this is the `Luduvo` account.
         let id = "1";
@@ -26,17 +25,19 @@ mod profile {
     #[test]
     fn get_profile_not_found() {
         let mut wrapper = ProfileWrapper::new(None);
-        
+
         // id `-1` is a known invalid user.
         // this test assumes that this id does not exist, and will never exist.
         // note(prim): why would -1 exist in the first place???
         let id = "-1";
 
         match wrapper.get_profile(id) {
-            Err(ProfileError::ProfileNotFound(returned_id) | ProfileError::InvalidId(returned_id)) => {
+            Err(
+                ProfileError::ProfileNotFound(returned_id) | ProfileError::InvalidId(returned_id),
+            ) => {
                 assert_eq!(returned_id, id);
             }
-            
+
             err => panic!("expected ProfileNotFound error, got {:?}", err),
         }
     }
@@ -47,9 +48,7 @@ mod profile {
         let mut wrapper = ProfileWrapper::new(None);
         let id = "1";
 
-        let profile = wrapper
-            .get_profile(id)
-            .expect("profile should exist");
+        let profile = wrapper.get_profile(id).expect("profile should exist");
 
         // sanity checks
         assert!(!profile.username.is_empty());

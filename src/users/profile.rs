@@ -181,7 +181,7 @@ impl ProfileCache {
 
         self.cache.insert(id, cached);
     }
-    
+
     /// removes a profile from the cache by its id.
     ///
     /// # arguments
@@ -205,14 +205,14 @@ impl ProfileWrapper {
     /// creates a new [`ProfileWrapper`].
     ///
     /// # notes
-    /// 
+    ///
     /// - this internally initializes a reusable [`reqwest::Client`] to perform HTTP requests, which is **not** publicly exposed.
     /// - this internally manages the cache for profile data. the cache is not publicly exposed.
-    /// 
+    ///
     /// # arguments
     ///
     /// * `cache_timeout` - the cache timeout in seconds. if `None`, defaults to 30 seconds.
-    /// 
+    ///
     /// # returns
     ///
     /// - a new [`ProfileWrapper`] instance if successful
@@ -227,11 +227,11 @@ impl ProfileWrapper {
     }
 
     /// creates a new [`ProfileWrapper`] with a provided reqwest client.
-    /// 
+    ///
     /// # notes
-    /// 
+    ///
     /// - the user is responsible for managing the http client.
-    /// 
+    ///
     /// # arguments
     ///
     /// * `client` - the reqwest client to use for HTTP requests.
@@ -244,16 +244,13 @@ impl ProfileWrapper {
         let cache_timeout = cache_timeout.unwrap_or(30);
         let cache = ProfileCache::new(cache_timeout);
 
-        Self {
-            client,
-            cache,
-        }
+        Self { client, cache }
     }
 
     /// fetch a user profile by its id.
-    /// 
+    ///
     /// # disclaimers
-    /// 
+    ///
     /// - this function is blocking!!!!! i think!!!
     ///
     /// # arguments
