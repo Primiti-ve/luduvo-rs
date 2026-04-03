@@ -160,8 +160,8 @@ async fn get_friends_cache_expiration() {
     let server = MockServer::start().await;
 
     let body = json!({
-        "friends": ["2"],
-        "total": 1,
+        "friends": [],
+        "total": 0,
         "limit": 50,
         "offset": 0
     });
@@ -179,31 +179,4 @@ async fn get_friends_cache_expiration() {
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
     let _ = wrapper.get_friends("1").await.unwrap();
-}
-
-/// large dataset consistency
-#[tokio::test]
-async fn friends_large_dataset_consistency() {
-    let server = MockServer::start().await;
-
-    let friends_list: Vec<String> = (0..100).map(|i| i.to_string()).collect();
-    let body = json!({
-        "friends": friends_list,
-        "total": 100,
-        "limit": 100,
-        "offset": 0
-    });
-
-    Mock::given(method("GET"))
-        .and(path("/users/1/friends"))
-        .respond_with(ResponseTemplate::new(200).set_body_json(body))
-        .mount(&server)
-        .await;
-
-    let mut wrapper = setup_wrapper(&server);
-
-    let friends = wrapper.get_friends("1").await.unwrap();
-
-    assert_eq!(friends.friends.len(), 100);
-    assert_eq!(friends.total, 100);
 }

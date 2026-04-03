@@ -20,16 +20,30 @@ pub enum FriendsError {
     #[error("invalid id `{0}`")]
     InvalidId(String),
 
+    /// the user has sent too many requests
+    #[error("too many requests")]
+    TooManyRequests(),
+
     /// an internal http client error occurred.
     #[error("request failed: {0}")]
     RequestFailed(#[from] reqwest::Error),
+}
+
+/// represents a single friend
+#[derive(Clone, Debug, Deserialize)]
+pub struct Friend {
+    /// the user id of the friend
+    pub user_id: u64,
+
+    /// the username of the friend
+    pub username: String,
 }
 
 /// represents a user's friends returned by the luduvo api.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Friends {
     /// the list of friends the user has
-    pub friends: Vec<String>,
+    pub friends: Vec<Friend>,
 
     /// the total amount of friends the user has
     pub total: u64,
@@ -37,9 +51,7 @@ pub struct Friends {
     /// the total amount of friends the user can have at a time
     pub limit: u64,
 
-    /// the current page of friends maybe???
-    /// 
-    /// none of this is documented......
+    /// the current page of friends
     pub offset: u64,
 }
 
@@ -236,6 +248,7 @@ impl FriendsWrapper {
     /// - [`FriendsError::ResultNotFound`] if the result does not exist (HTTP 404)
     /// - [`FriendsError::RequestFailed`] for network or decoding errors
     /// - [`FriendsError::InvalidId`] if the id is not a valid string
+    /// - [`ProfileError::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Friends`] if successful
     ///
     /// # examples
@@ -274,6 +287,8 @@ impl FriendsWrapper {
 
         if response.status() == StatusCode::NOT_FOUND {
             return Err(FriendsError::ResultNotFound(id.to_string()));
+        } else if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            return Err(FriendsError::TooManyRequests());
         }
 
         let response = response.error_for_status()?;

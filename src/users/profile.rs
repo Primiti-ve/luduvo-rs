@@ -20,6 +20,10 @@ pub enum ProfileError {
     #[error("invalid id `{0}`")]
     InvalidId(String),
 
+    /// the user has sent too many requests
+    #[error("too many requests")]
+    TooManyRequests(),
+
     /// an internal http client error occurred.
     #[error("request failed: {0}")]
     RequestFailed(#[from] reqwest::Error),
@@ -40,28 +44,51 @@ pub struct ProfileAvatar {
     pub right_leg_color: String,
 }
 
+/// represents a user's obtained badge
+#[derive(Clone, Debug, Deserialize)]
+pub struct Badge {
+    /// the id of the badge
+    pub id: u64,
+
+    /// the name of the badge
+    pub name: String,
+
+    /// a human-readable version of the badge's name (according to wikipedia)
+    pub slug: String,
+
+    /// the description of the badge
+    pub description: String,
+
+    /// the url for the shown icon of the badge
+    pub icon_url: String,
+}
+
+/// represents a user's equipped item
+#[derive(Clone, Debug, Deserialize)]
+pub struct EquippedItem {
+    // todo: fill this in later
+}
+
 /// represents a user profile returned by the luduvo api.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Profile {
-    /// the profiles user id.
+    /// the users user id.
     /// this is unique to each profile.
     pub user_id: u64,
 
-    /// the profiles username.
+    /// the users username.
     /// this is unique to each profile.
     pub username: String,
 
     /// display name shown to other users.
     ///
-    /// when the account is first created, this defaults to [`username`](Self::username).
-    ///
-    /// it can be changed by the user at any time.
+    /// when the account is first created, this defaults to [`username`](Self::username). it can be changed by the user at any time.
     pub display_name: String,
 
     /// optional long-form description of the profile.
     pub bio: Option<String>,
 
-    /// optional short status message of the profile.
+    /// a status code of what the user is currently doing.
     pub status: Option<String>,
 
     /// the user's avatar appearance configuration.
@@ -69,19 +96,19 @@ pub struct Profile {
     pub avatar: ProfileAvatar,
 
     /// a list of the user's equipped items.
-    pub equipped_items: Vec<String>,
+    pub equipped_items: Vec<EquippedItem>,
 
     /// a list of badge identifiers earned by the user.
-    pub badges: Vec<String>,
+    pub badges: Vec<Badge>,
 
     /// the total number of friends the user has.
-    pub friend_count: u32,
+    pub friend_count: u64,
 
     /// the total number of owned places the user has.
-    pub place_count: u32,
+    pub place_count: u64,
 
     /// the total number of owned items the user has.
-    pub item_count: u32,
+    pub item_count: u64,
 
     /// last active timestamp (in unix seconds).
     ///
@@ -89,8 +116,6 @@ pub struct Profile {
     pub last_active: Option<u64>,
 
     /// account creation timestamp (in unix seconds).
-    ///
-    /// this is a `None` in just id `1`s case
     pub member_since: Option<u64>,
 
     /// whether others are allowed to join this user.
@@ -294,6 +319,7 @@ impl ProfileWrapper {
     /// - [`ProfileError::ProfileNotFound`] if the profile does not exist (HTTP 404)
     /// - [`ProfileError::RequestFailed`] for network or decoding errors
     /// - [`ProfileError::InvalidId`] if the id is not a valid string
+    /// - [`ProfileError::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Profile`] if successful
     ///
     /// # examples
@@ -332,6 +358,8 @@ impl ProfileWrapper {
 
         if response.status() == StatusCode::NOT_FOUND {
             return Err(ProfileError::ProfileNotFound(id.to_string()));
+        } else if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            return Err(ProfileError::TooManyRequests());
         }
 
         let response = response.error_for_status()?;
