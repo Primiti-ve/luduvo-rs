@@ -28,14 +28,18 @@ use luduvo_rs::users::profile::ProfileWrapper;
 #[tokio::main]
 async fn main() {
     let mut wrapper = ProfileWrapper::new(None);
+    let id = "1";
 
-    match wrapper.get_profile("1").await {
+    match wrapper.get_profile(id).await {
         Ok(profile) => {
-            println!("{:#?}", profile);
+            println!("profile for id `{id}`: {:#?}", profile);
         }
 
         Err(e) => {
-            eprintln!("error caught while attempting to get profile: '{}'", e);
+            eprintln!(
+                "error caught while attempting to get profile for id `{id}`: '{:#?}'",
+                e
+            );
         }
     }
 }
