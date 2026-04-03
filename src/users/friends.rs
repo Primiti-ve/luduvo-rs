@@ -37,11 +37,13 @@ pub struct Friends {
     /// the total amount of friends the user can have at a time
     pub limit: u64,
 
-    /// idek bro dont ask me
+    /// the current page of friends maybe???
+    /// 
+    /// none of this is documented......
     pub offset: u64,
 }
 
-/// a cached friends entry, containing the user's friends dat and its last updated timestamp.
+/// a cached friends entry, containing the user's friends data and its last updated timestamp.
 ///
 /// this is used internally by [`FriendsCache`] to store friends data.
 #[derive(Clone)]

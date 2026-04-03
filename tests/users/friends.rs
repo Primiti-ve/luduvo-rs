@@ -1,13 +1,10 @@
 use luduvo_rs::users::friends::{FriendsError, FriendsWrapper};
-use wiremock::{Mock, MockServer, ResponseTemplate};
-use wiremock::matchers::{method, path};
 use serde_json::json;
+use wiremock::matchers::{method, path};
+use wiremock::{Mock, MockServer, ResponseTemplate};
 
 fn setup_wrapper(server: &MockServer) -> FriendsWrapper {
-    FriendsWrapper::new_with_base_url(
-        Some(60),
-        format!("{}/users", server.uri()),
-    )
+    FriendsWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))
 }
 
 /// tests that valid friends data can be fetched
@@ -176,11 +173,7 @@ async fn get_friends_cache_expiration() {
         .mount(&server)
         .await;
 
-    let mut wrapper = FriendsWrapper::new_with_base_url(
-        Some(1),
-        format!("{}/users", server.uri()),
-    );
-
+    let mut wrapper = FriendsWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
     let _ = wrapper.get_friends("1").await.unwrap();
 
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
@@ -194,7 +187,6 @@ async fn friends_large_dataset_consistency() {
     let server = MockServer::start().await;
 
     let friends_list: Vec<String> = (0..100).map(|i| i.to_string()).collect();
-
     let body = json!({
         "friends": friends_list,
         "total": 100,

@@ -89,7 +89,7 @@ pub struct Profile {
     pub last_active: Option<u64>,
 
     /// account creation timestamp (in unix seconds).
-    /// 
+    ///
     /// this is a `None` in just id `1`s case
     pub member_since: Option<u64>,
 
