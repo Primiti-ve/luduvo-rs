@@ -1,5 +1,5 @@
 name: ldh webhook
-on: [push, pull_request, issues]
+on: [push, pull_request]
 
 jobs:
   send:
