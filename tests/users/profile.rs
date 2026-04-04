@@ -1,6 +1,6 @@
 use luduvo_rs::users::profile::{ProfileError, ProfileWrapper};
-use tokio::time;
 use serde_json::json;
+use tokio::time;
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -75,7 +75,7 @@ async fn get_profile_not_found() {
 
     match wrapper.get_profile("999").await {
         Err(ProfileError::ProfileNotFound(id)) => assert_eq!(id, "999"),
-        
+
         other => panic!("expected ProfileNotFound, got {:?}", other),
     }
 }
@@ -87,7 +87,7 @@ async fn get_profile_invalid_id_format() {
 
     match wrapper.get_profile("abc").await {
         Err(ProfileError::InvalidId(id)) => assert_eq!(id, "abc"),
-        
+
         other => panic!("expected InvalidId, got {:?}", other),
     }
 }
@@ -147,7 +147,7 @@ async fn get_profile_server_error() {
 
     match wrapper.get_profile("1").await {
         Err(ProfileError::RequestFailed(_)) => {}
-        
+
         other => panic!("expected RequestFailed, got {:?}", other),
     }
 }
@@ -167,7 +167,7 @@ async fn get_profile_invalid_json() {
 
     match wrapper.get_profile("1").await {
         Err(ProfileError::RequestFailed(_)) => {}
-        
+
         other => panic!("expected RequestFailed, got {:?}", other),
     }
 }
@@ -177,7 +177,7 @@ async fn get_profile_invalid_json() {
 async fn profile_optional_fields_none() {
     let server = MockServer::start().await;
     let mut body = mock_profile_body();
-    
+
     body["bio"] = serde_json::Value::Null;
     body["status"] = serde_json::Value::Null;
     body["last_active"] = serde_json::Value::Null;
@@ -204,7 +204,7 @@ async fn get_profile_cache_expiration() {
 
     let body = {
         let mut mock_body = mock_profile_body();
-        
+
         mock_body["member_since"] = json!(1000);
         mock_body
     };
@@ -216,10 +216,7 @@ async fn get_profile_cache_expiration() {
         .mount(&server)
         .await;
 
-    let mut wrapper = ProfileWrapper::new_with_base_url(
-        Some(1),
-        format!("{}/users", server.uri()),
-    );
+    let mut wrapper = ProfileWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
 
     let _ = wrapper.get_profile("1").await.unwrap();
 

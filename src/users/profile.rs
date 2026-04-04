@@ -20,7 +20,7 @@ pub enum ProfileError {
     #[error("invalid id `{0}`")]
     InvalidId(String),
 
-    /// the user has sent too many requests
+    /// the user has sent too many requests to the api.
     #[error("too many requests")]
     TooManyRequests(),
 
@@ -72,7 +72,7 @@ pub struct EquippedItem {
 /// represents a user profile returned by the luduvo api.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Profile {
-    /// the users user id.
+    /// the users id.
     /// this is unique to each profile.
     pub user_id: u64,
 
@@ -304,25 +304,26 @@ impl ProfileWrapper {
         }
     }
 
-    /// fetch a user profile by its id.
+    /// fetches a user profile by id.
     ///
-    /// # disclaimers
+    /// # notes
     ///
-    /// - this function is async
+    /// - this function is asynchronous.
     ///
     /// # arguments
     ///
     /// * `id` - the user id as a string.
     ///
-    /// # returns
+    /// # errors
     ///
+    /// returns:
     /// - [`ProfileError::ProfileNotFound`] if the profile does not exist (HTTP 404)
     /// - [`ProfileError::RequestFailed`] for network or decoding errors
     /// - [`ProfileError::InvalidId`] if the id is not a valid string
     /// - [`ProfileError::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Profile`] if successful
     ///
-    /// # examples
+    /// # example
     ///
     /// ```no_run
     /// use luduvo_rs::users::profile::ProfileWrapper;

@@ -20,7 +20,7 @@ pub enum FriendsError {
     #[error("invalid id `{0}`")]
     InvalidId(String),
 
-    /// the user has sent too many requests
+    /// the user has sent too many requests to the api.
     #[error("too many requests")]
     TooManyRequests(),
 
@@ -29,7 +29,7 @@ pub enum FriendsError {
     RequestFailed(#[from] reqwest::Error),
 }
 
-/// represents a single friend
+/// represents a single friend.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Friend {
     /// the user id of the friend
@@ -42,16 +42,16 @@ pub struct Friend {
 /// represents a user's friends returned by the luduvo api.
 #[derive(Clone, Debug, Deserialize)]
 pub struct Friends {
-    /// the list of friends the user has
+    /// the list of friends the user has.
     pub friends: Vec<Friend>,
 
-    /// the total amount of friends the user has
+    /// the total amount of friends the user has.
     pub total: u64,
 
-    /// the total amount of friends the user can have at a time
+    /// the total amount of friends the user can have at a time.
     pub limit: u64,
 
-    /// the current page of friends
+    /// the current page of friends.
     pub offset: u64,
 }
 
@@ -233,25 +233,26 @@ impl FriendsWrapper {
         }
     }
 
-    /// fetch a users friends data by its id.
+    /// fetches a users friends by id.
     ///
-    /// # disclaimers
+    /// # notes
     ///
-    /// - this function is async
+    /// - this function is asynchronous.
     ///
     /// # arguments
     ///
     /// * `id` - the user id as a string.
     ///
-    /// # returns
+    /// # errors
     ///
+    /// returns:
     /// - [`FriendsError::ResultNotFound`] if the result does not exist (HTTP 404)
     /// - [`FriendsError::RequestFailed`] for network or decoding errors
     /// - [`FriendsError::InvalidId`] if the id is not a valid string
-    /// - [`ProfileError::TooManyRequests`] if the user has sent too many requests within a short timespan
+    /// - [`FriendsError::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Friends`] if successful
     ///
-    /// # examples
+    /// # example
     ///
     /// ```no_run
     /// use luduvo_rs::users::friends::FriendsWrapper;

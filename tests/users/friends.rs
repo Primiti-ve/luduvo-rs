@@ -7,17 +7,20 @@ fn setup_wrapper(server: &MockServer) -> FriendsWrapper {
     FriendsWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))
 }
 
-/// tests that valid friends data can be fetched
-#[tokio::test]
-async fn get_friends_success() {
-    let server = MockServer::start().await;
-
-    let body = json!({
+fn mock_profile_body() -> serde_json::Value {
+    json!({
         "friends": [],
         "total": 0,
         "limit": 50,
         "offset": 0
-    });
+    })
+}
+
+/// tests that valid friends data can be fetched
+#[tokio::test]
+async fn get_friends_success() {
+    let server = MockServer::start().await;
+    let body = mock_profile_body();
 
     Mock::given(method("GET"))
         .and(path("/users/1/friends"))
@@ -26,7 +29,6 @@ async fn get_friends_success() {
         .await;
 
     let mut wrapper = setup_wrapper(&server);
-
     let friends = wrapper.get_friends("1").await.unwrap();
 
     assert_eq!(friends.total, 0);
@@ -59,6 +61,7 @@ async fn get_friends_not_found() {
 
     match wrapper.get_friends("999").await {
         Err(FriendsError::ResultNotFound(id)) => assert_eq!(id, "999"),
+
         other => panic!("expected ResultNotFound, got {:?}", other),
     }
 }
@@ -67,13 +70,7 @@ async fn get_friends_not_found() {
 #[tokio::test]
 async fn get_friends_cache_hit() {
     let server = MockServer::start().await;
-
-    let body = json!({
-        "friends": [],
-        "total": 0,
-        "limit": 50,
-        "offset": 0
-    });
+    let body = mock_profile_body();
 
     Mock::given(method("GET"))
         .and(path("/users/1/friends"))
@@ -94,13 +91,7 @@ async fn get_friends_cache_hit() {
 #[tokio::test]
 async fn friends_pagination_sanity() {
     let server = MockServer::start().await;
-
-    let body = json!({
-        "friends": [],
-        "total": 0,
-        "limit": 50,
-        "offset": 0
-    });
+    let body = mock_profile_body();
 
     Mock::given(method("GET"))
         .and(path("/users/1/friends"))
@@ -131,6 +122,7 @@ async fn get_friends_server_error() {
 
     match wrapper.get_friends("1").await {
         Err(FriendsError::RequestFailed(_)) => {}
+
         other => panic!("expected RequestFailed, got {:?}", other),
     }
 }
@@ -150,6 +142,7 @@ async fn get_friends_invalid_json() {
 
     match wrapper.get_friends("1").await {
         Err(FriendsError::RequestFailed(_)) => {}
+
         other => panic!("expected RequestFailed, got {:?}", other),
     }
 }
@@ -158,13 +151,7 @@ async fn get_friends_invalid_json() {
 #[tokio::test]
 async fn get_friends_cache_expiration() {
     let server = MockServer::start().await;
-
-    let body = json!({
-        "friends": [],
-        "total": 0,
-        "limit": 50,
-        "offset": 0
-    });
+    let body = mock_profile_body();
 
     Mock::given(method("GET"))
         .and(path("/users/1/friends"))
