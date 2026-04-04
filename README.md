@@ -1,21 +1,27 @@
-# luduvo-rs
+<img src="https://github.com/Primiti-ve/luduvo-rs/blob/main/gh-assets/logo.png?raw=true" alt="luduvo-rs" height=256/>
 
-*luduvo-rs* is a rust library for interacting with the [luduvo](luduvo.com) api.
+### *luduvo-rs* is a rust library designed for interacting with the [luduvo](luduvo.com) api.
 
 ## links
 
 - [crates.io](https://crates.io/crates/luduvo-rs)
 - [docs.rs](https://docs.rs/luduvo-rs/latest/luduvo_rs)
-- [support server](https://discord.gg/FcjTvuWKRk)
+- [luduvo development hub](https://discord.gg/FcjTvuWKRk)
 
-## disclaimers
+## notes
 
-- this crate is a completely fanmade wrapper around the luduvo api.
-- this crate is MIT-licensed. do whatever with it!
-- i'm not good at rust; all contributions (pull requests, issues) are welcomed!
-- you need an asynchronous runtime in order to use this.
-  - tokio is the intended runtime for this crate!
-- most users will want to import the prelude, via `luduvo_rs::prelude::*`
+> [!WARNING]
+> this crate is completely fanmade and has no affiliation with the luduvo devs.
+
+> [!NOTE]
+> this crate is MIT-licensed. feel free to do whatever with it!
+> all contributions (pull requests, issues) are welcomed.
+
+> [!IMPORTANT]
+> you need an asynchronous runtime in order to use this. **tokio** is the intended runtime for this crate!
+
+> [!TIP]
+> most users will want to import the prelude, via `luduvo_rs::prelude::*`
 
 ## features
 
@@ -24,7 +30,10 @@
 
 ## quick start
 
-```no_run
+> [!NOTE]
+> the code snippet below uses the prelude, which re-exports commonly used structs!
+
+```rust
 use luduvo_rs::prelude::*;
 
 #[tokio::main]
@@ -32,13 +41,14 @@ async fn main() {
     let mut api = ProfileWrapper::new(None);
     let profile = api.get_profile("1").await.unwrap();
 
-    println!("Hello, {}!", profile.username);
+    println!("hello {}!", profile.username);
 }
 ```
 
 ## example
 
-the code snippet below is taken directly from `examples/get_profile.rs`!
+> [!NOTE]
+> the code snippet below is taken directly from `examples/get_profile.rs`!
 
 ```rust
 use luduvo_rs::users::profile::ProfileWrapper;
@@ -63,9 +73,13 @@ async fn main() {
 }
 ```
 
+## contributors
+
+- [Eeviika](https://github.com/Eeviika) for [#1](https://github.com/Primiti-ve/luduvo-rs/pull/1) (Small changes)
+
 ## need help?
 
 - contact me on discord! my discord username is `@primiti_ve`.
   - ping me in the [luduvo discord](https://discord.gg/luduvo).
-  - join the [support server](https://discord.gg/FcjTvuWKRk).
+  - join the [luduvo development hub](https://discord.gg/FcjTvuWKRk).
 - create an issue (https://github.com/Primiti-ve/luduvo-rs/issues)
