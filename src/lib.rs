@@ -21,7 +21,7 @@
 //!
 //! - user profile data
 //! - user friends data
-//! 
+//!
 //! ## quick start
 //!
 //! ```no_run
@@ -31,7 +31,7 @@
 //! async fn main() {
 //!     let mut api = ProfileWrapper::new(None);
 //!     let profile = api.get_profile("1").await.unwrap();
-//! 
+//!
 //!     println!("Hello, {}!", profile.username);
 //! }
 //! ```

@@ -1,7 +1,9 @@
-use luduvo_rs::users::friends::{FriendsError, FriendsWrapper};
+use luduvo_rs::prelude::*;
 use serde_json::json;
-use wiremock::matchers::{method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{method, path},
+};
 
 fn setup_wrapper(server: &MockServer) -> FriendsWrapper {
     FriendsWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))

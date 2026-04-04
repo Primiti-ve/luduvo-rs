@@ -1,8 +1,10 @@
-use luduvo_rs::users::profile::{ProfileError, ProfileWrapper};
+use luduvo_rs::prelude::*;
 use serde_json::json;
 use tokio::time;
-use wiremock::matchers::{method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
+use wiremock::{
+    Mock, MockServer, ResponseTemplate,
+    matchers::{method, path},
+};
 
 fn setup_wrapper(server: &MockServer) -> ProfileWrapper {
     ProfileWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))
@@ -217,7 +219,6 @@ async fn get_profile_cache_expiration() {
         .await;
 
     let mut wrapper = ProfileWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
-
     let _ = wrapper.get_profile("1").await.unwrap();
 
     time::sleep(std::time::Duration::from_secs(2)).await;
