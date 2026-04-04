@@ -24,7 +24,7 @@
 //!
 //! ## quick start
 //!
-//! ```no_run
+//! ```rust
 //! use luduvo_rs::prelude::*;
 //!
 //! #[tokio::main]
@@ -32,7 +32,7 @@
 //!     let mut api = ProfileWrapper::new(None);
 //!     let profile = api.get_profile("1").await.unwrap();
 //!
-//!     println!("Hello, {}!", profile.username);
+//!     println!("hello, {}!", profile.username);
 //! }
 //! ```
 //!
