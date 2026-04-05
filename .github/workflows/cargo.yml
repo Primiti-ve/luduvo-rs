@@ -9,7 +9,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  qa:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,6 +23,12 @@ jobs:
 
       - name: clippy
         run: cargo clippy --verbose
+
+      - name: install toml-cli
+        run: cargo install toml-cli
+
+      - name: check version
+        run: test "v$(toml get -r Cargo.toml package.version)" = "${{ github.ref_name }}"
 
       - name: publish
         run: cargo publish --verbose
