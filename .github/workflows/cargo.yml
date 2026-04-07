@@ -3,50 +3,32 @@ name: cargo
 on:
   push:
     branches: ["main"]
-    tags:
-      - "v*.*.*"
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   qa:
-    if: github.ref_type == 'branch'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: build
-        run: cargo build --verbose
-
-      - name: run tests
-        run: cargo test --tests --verbose
-
-      - name: clippy
-        run: cargo clippy --verbose
+      - run: cargo build --verbose
+      - run: cargo test --tests --verbose
+      - run: cargo clippy --verbose
 
   publish:
-    if: github.ref_type == 'tag'
+    needs: qa
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: build
-        run: cargo build --verbose
-
-      - name: run tests
-        run: cargo test --tests --verbose
-
-      - name: clippy
-        run: cargo clippy --verbose
-
-      - name: install toml-cli
-        run: cargo install toml-cli
-
-      - name: check version
-        run: test "v$(toml get -r Cargo.toml package.version)" = "${{ github.ref_name }}"
+      - run: cargo build --verbose
+      - run: cargo test --tests --verbose
+      - run: cargo clippy --verbose
+        
+      - name: check if version already exists
+        run: cargo publish --dry-run
 
       - name: publish
         run: cargo publish --verbose
