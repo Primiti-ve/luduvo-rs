@@ -5,8 +5,8 @@ push title description:
     git commit -m "{{title}}" -m "{{description}}"
     git push origin main
 
-release version:
+release version description:
     git add -A
-    git commit -m "{{version}}"
+    git commit -m "{{version}}" -m "description"
     git tag "{{version}}"
     git push origin main --tags

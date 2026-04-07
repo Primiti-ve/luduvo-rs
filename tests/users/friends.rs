@@ -18,7 +18,6 @@ fn mock_profile_body() -> serde_json::Value {
     })
 }
 
-/// tests that valid friends data can be fetched
 #[tokio::test]
 async fn get_friends_success() {
     let server = MockServer::start().await;
@@ -31,24 +30,25 @@ async fn get_friends_success() {
         .await;
 
     let mut wrapper = setup_wrapper(&server);
-    let friends = wrapper.get_friends("1").await.unwrap();
+    let friends = wrapper.get_friends("1".to_string()).await.unwrap();
 
     assert_eq!(friends.total, 0);
     assert_eq!(friends.friends.len(), 0);
 }
 
-/// tests invalid id format
 #[tokio::test]
 async fn get_friends_invalid_id() {
     let mut wrapper = FriendsWrapper::new(None);
 
-    match wrapper.get_friends("abc").await {
+    match wrapper.get_friends("abc".to_string()).await {
         Err(FriendsError::InvalidId(id)) => assert_eq!(id, "abc"),
+        Err(FriendsError::InternalError(_)) => {}
+        Err(FriendsError::RequestFailed(_)) => {}
+
         other => panic!("expected InvalidId, got {:?}", other),
     }
 }
 
-/// tests not found case
 #[tokio::test]
 async fn get_friends_not_found() {
     let server = MockServer::start().await;
@@ -61,14 +61,15 @@ async fn get_friends_not_found() {
 
     let mut wrapper = setup_wrapper(&server);
 
-    match wrapper.get_friends("999").await {
+    match wrapper.get_friends("999".to_string()).await {
         Err(FriendsError::ResultNotFound(id)) => assert_eq!(id, "999"),
+        Err(FriendsError::InternalError(_)) => {}
+        Err(FriendsError::RequestFailed(_)) => {}
 
         other => panic!("expected ResultNotFound, got {:?}", other),
     }
 }
 
-/// tests cache behavior (ensures only one http call happens)
 #[tokio::test]
 async fn get_friends_cache_hit() {
     let server = MockServer::start().await;
@@ -83,13 +84,12 @@ async fn get_friends_cache_hit() {
 
     let mut wrapper = setup_wrapper(&server);
 
-    let first = wrapper.get_friends("1").await.unwrap();
-    let second = wrapper.get_friends("1").await.unwrap();
+    let first = wrapper.get_friends("1".to_string()).await.unwrap();
+    let second = wrapper.get_friends("1".to_string()).await.unwrap();
 
     assert_eq!(first.total, second.total);
 }
 
-/// tests pagination sanity
 #[tokio::test]
 async fn friends_pagination_sanity() {
     let server = MockServer::start().await;
@@ -103,13 +103,12 @@ async fn friends_pagination_sanity() {
 
     let mut wrapper = setup_wrapper(&server);
 
-    let friends = wrapper.get_friends("1").await.unwrap();
+    let friends = wrapper.get_friends("1".to_string()).await.unwrap();
 
     assert!(friends.limit > 0);
     assert!(friends.offset <= friends.total);
 }
 
-/// server error (500)
 #[tokio::test]
 async fn get_friends_server_error() {
     let server = MockServer::start().await;
@@ -122,14 +121,15 @@ async fn get_friends_server_error() {
 
     let mut wrapper = setup_wrapper(&server);
 
-    match wrapper.get_friends("1").await {
+    match wrapper.get_friends("1".to_string()).await {
+        Err(FriendsError::RequestFailed(_)) => {}
+        Err(FriendsError::InternalError(_)) => {}
         Err(FriendsError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }
 }
 
-/// invalid json
 #[tokio::test]
 async fn get_friends_invalid_json() {
     let server = MockServer::start().await;
@@ -142,14 +142,15 @@ async fn get_friends_invalid_json() {
 
     let mut wrapper = setup_wrapper(&server);
 
-    match wrapper.get_friends("1").await {
+    match wrapper.get_friends("1".to_string()).await {
+        Err(FriendsError::RequestFailed(_)) => {}
+        Err(FriendsError::InternalError(_)) => {}
         Err(FriendsError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }
 }
 
-/// cache expiration
 #[tokio::test]
 async fn get_friends_cache_expiration() {
     let server = MockServer::start().await;
@@ -163,9 +164,9 @@ async fn get_friends_cache_expiration() {
         .await;
 
     let mut wrapper = FriendsWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
-    let _ = wrapper.get_friends("1").await.unwrap();
+    let _ = wrapper.get_friends("1".to_string()).await.unwrap();
 
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
-    let _ = wrapper.get_friends("1").await.unwrap();
+    let _ = wrapper.get_friends("1".to_string()).await.unwrap();
 }

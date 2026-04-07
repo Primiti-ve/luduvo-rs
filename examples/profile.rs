@@ -10,11 +10,11 @@ async fn main() {
         "1"
     } else {
         &args[1]
-    };
+    }.to_string();
 
     let mut wrapper = ProfileWrapper::new(None);
 
-    match wrapper.get_profile(id).await {
+    match wrapper.get_user(id.clone()).await {
         Ok(profile) => {
             println!("profile for id `{id}`: {:#?}", profile);
         }

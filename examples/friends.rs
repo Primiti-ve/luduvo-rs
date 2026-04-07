@@ -10,11 +10,11 @@ async fn main() {
         "1"
     } else {
         &args[1]
-    };
+    }.to_string();
 
     let mut wrapper = FriendsWrapper::new(None);
 
-    match wrapper.get_friends(id).await {
+    match wrapper.get_friends(id.clone()).await {
         Ok(friends) => {
             println!("friends for id `{id}`: {:#?}", friends);
         }

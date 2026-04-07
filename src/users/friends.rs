@@ -1,3 +1,7 @@
+//! # friends api
+//!
+//! this module contains structs related to luduvo friends data.
+
 use reqwest::{Client, StatusCode};
 use serde::Deserialize;
 use std::{
@@ -6,8 +10,7 @@ use std::{
 };
 use thiserror::Error;
 
-/// base url for the luduvo friends api.
-pub const BASE_URL: &str = "https://api.luduvo.com/users";
+use super::BASE_URL;
 
 /// errors that can occur when fetching the friends data.
 #[derive(Error, Debug)]
@@ -27,6 +30,10 @@ pub enum FriendsError {
     /// an internal http client error occurred.
     #[error("request failed: {0}")]
     RequestFailed(#[from] reqwest::Error),
+
+    /// an error with luduvo servers occurred.
+    #[error("there was an error with the luduvo servers: `{0}`")]
+    InternalError(String),
 }
 
 /// represents a single friend.
@@ -254,14 +261,14 @@ impl FriendsWrapper {
     ///
     /// # example
     ///
-    /// ```no_run
+    /// ```rust
     /// use luduvo_rs::users::friends::FriendsWrapper;
     ///
     /// #[tokio::main]
     /// async fn main() {
     ///     let mut wrapper = FriendsWrapper::new(None);
     ///
-    ///     match wrapper.get_friends("1").await {
+    ///     match wrapper.get_friends("1".to_string()).await {
     ///         Ok(friends) => {
     ///             println!("{:#?}", friends);
     ///         }
@@ -272,35 +279,35 @@ impl FriendsWrapper {
     ///     }
     /// }
     /// ```
-    pub async fn get_friends(&mut self, id: &str) -> Result<Friends, FriendsError> {
+    pub async fn get_friends(&mut self, id: String) -> Result<Friends, FriendsError> {
         let id_num: u64 = id
             .parse()
-            .map_err(|_| FriendsError::InvalidId(id.to_string()))?;
+            .map_err(|_| FriendsError::InvalidId(id.clone()))?;
 
-        {
-            if let Some(friends) = self.cache.get(id_num) {
-                return Ok(friends);
-            }
+        if let Some(friends) = self.cache.get(id_num) {
+            return Ok(friends);
         }
 
         let url = format!("{}/{}/friends", self.base_url, id);
         let response = self.client.get(&url).send().await?;
 
-        if response.status() == StatusCode::NOT_FOUND {
-            return Err(FriendsError::ResultNotFound(id.to_string()));
-        } else if response.status() == StatusCode::TOO_MANY_REQUESTS {
+        let status = response.status();
+
+        if status == StatusCode::NOT_FOUND {
+            return Err(FriendsError::ResultNotFound(id));
+        } else if status == StatusCode::TOO_MANY_REQUESTS {
             return Err(FriendsError::TooManyRequests());
+        } else if status == StatusCode::INTERNAL_SERVER_ERROR {
+            let reason = status.canonical_reason().unwrap_or("no error supplied");
+
+            return Err(FriendsError::InternalError(reason.to_string()));
         }
 
         let response = response.error_for_status()?;
-        let friends = response.json::<Friends>().await?;
+        let result = response.json::<Friends>().await?;
 
-        {
-            let mut cache = &mut self.cache;
+        self.cache.insert(id_num, result.clone());
 
-            cache.insert(id_num, friends.clone());
-        }
-
-        Ok(friends)
+        Ok(result)
     }
 }

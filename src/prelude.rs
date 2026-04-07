@@ -31,17 +31,23 @@
 //! - [`FriendsWrapper`]
 //! - [`FriendsError`]
 //!
+//!
+//! ### query api
+//! - [`Query`]
+//! - [`QueryWrapper`]
+//! - [`QueryError`]
+//!
 //! ## example
 //!
-//! ```no_run
+//! ```rust
 //! use luduvo_rs::prelude::*;
 //!
 //! #[tokio::main]
 //! async fn main() {
 //!     let mut wrapper = ProfileWrapper::new(None);
-//!     let id = "1";
+//!     let id = "1".to_string();
 //!
-//!     match wrapper.get_profile(id).await {
+//!     match wrapper.get_user(id.clone()).await {
 //!         Ok(profile) => {
 //!             println!("profile for id `{id}`: {:#?}", profile);
 //!         }
@@ -58,9 +64,15 @@
 //!
 //! ## when not to use prelude
 //!
-//! if you prefer more explicit imports (recommended for large projects), you may want to import items directly from their modules instead. this avoids namespace pollution and makes dependencies clearer.
+//! if you prefer more explicit imports (which is recommended for larger projects), you may want to import items directly from their modules instead.
+//!
+//! this avoids namespace pollution and makes dependencies clearer.
 
-use super::users;
+#[cfg(feature = "friends")]
+pub use super::users::friends::{Friends, FriendsError, FriendsWrapper};
 
-pub use users::friends::{Friends, FriendsError, FriendsWrapper};
-pub use users::profile::{Profile, ProfileError, ProfileWrapper};
+#[cfg(feature = "profile")]
+pub use super::users::profile::{Profile, ProfileError, ProfileWrapper};
+
+#[cfg(feature = "query")]
+pub use super::users::query::{Query, QueryError, QueryWrapper};

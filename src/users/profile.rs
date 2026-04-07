@@ -1,3 +1,9 @@
+//! # profile api
+//!
+//! this module contains structs related to fetching a single luduvo user at once.
+//!
+//! this is for searching users by id. for searching users by username, use a [`QueryWrapper`] with a limit of 1.
+
 use reqwest::{Client, StatusCode};
 use serde::Deserialize;
 use std::{
@@ -6,8 +12,7 @@ use std::{
 };
 use thiserror::Error;
 
-/// base url for the luduvo profile api.
-pub const BASE_URL: &str = "https://api.luduvo.com/users";
+use super::BASE_URL;
 
 /// errors that can occur when fetching a profile.
 #[derive(Error, Debug)]
@@ -27,6 +32,10 @@ pub enum ProfileError {
     /// an internal http client error occurred.
     #[error("request failed: {0}")]
     RequestFailed(#[from] reqwest::Error),
+
+    /// an error with luduvo servers occurred.
+    #[error("there was an error with the luduvo servers: `{0}`")]
+    InternalError(String),
 }
 
 /// represents the color configuration of a user's avatar.
@@ -219,7 +228,7 @@ impl ProfileCache {
     }
 }
 
-/// a client for interacting with the luduvo profile api.
+/// a client for interacting with the luduvo user profile api.
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
@@ -325,14 +334,14 @@ impl ProfileWrapper {
     ///
     /// # example
     ///
-    /// ```no_run
+    /// ```rust
     /// use luduvo_rs::users::profile::ProfileWrapper;
     ///
     /// #[tokio::main]
     /// async fn main() {
     ///     let mut wrapper = ProfileWrapper::new(None);
     ///
-    ///     match wrapper.get_profile("1").await {
+    ///     match wrapper.get_user("1".to_string()).await {
     ///         Ok(profile) => {
     ///             println!("{:#?}", profile);
     ///         },
@@ -343,34 +352,34 @@ impl ProfileWrapper {
     ///     }
     /// }
     /// ```
-    pub async fn get_profile(&mut self, id: &str) -> Result<Profile, ProfileError> {
+    pub async fn get_user(&mut self, id: String) -> Result<Profile, ProfileError> {
         let id_num: u64 = id
             .parse()
-            .map_err(|_| ProfileError::InvalidId(id.to_string()))?;
+            .map_err(|_| ProfileError::InvalidId(id.clone()))?;
 
-        {
-            if let Some(profile) = self.cache.get(id_num) {
-                return Ok(profile);
-            }
+        if let Some(profile) = self.cache.get(id_num) {
+            return Ok(profile);
         }
 
         let url = format!("{}/{}/profile", self.base_url, id);
         let response = self.client.get(&url).send().await?;
 
-        if response.status() == StatusCode::NOT_FOUND {
-            return Err(ProfileError::ProfileNotFound(id.to_string()));
-        } else if response.status() == StatusCode::TOO_MANY_REQUESTS {
+        let status = response.status();
+
+        if status == StatusCode::NOT_FOUND {
+            return Err(ProfileError::ProfileNotFound(id));
+        } else if status == StatusCode::TOO_MANY_REQUESTS {
             return Err(ProfileError::TooManyRequests());
+        } else if status == StatusCode::INTERNAL_SERVER_ERROR {
+            let reason = status.canonical_reason().unwrap_or("no error supplied");
+
+            return Err(ProfileError::InternalError(reason.to_string()));
         }
 
         let response = response.error_for_status()?;
         let profile = response.json::<Profile>().await?;
 
-        {
-            let mut cache = &mut self.cache;
-
-            cache.insert(profile.clone());
-        }
+        self.cache.insert(profile.clone());
 
         Ok(profile)
     }

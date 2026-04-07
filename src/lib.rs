@@ -19,8 +19,9 @@
 //!
 //! ## features
 //!
-//! - user profile data
+//! - user profile data (search by id)
 //! - user friends data
+//! - user querying (search by username + multiple results)
 //!
 //! ## quick start
 //!
@@ -29,8 +30,10 @@
 //!
 //! #[tokio::main]
 //! async fn main() {
-//!     let mut api = ProfileWrapper::new(None);
-//!     let profile = api.get_profile("1").await.unwrap();
+//!     let mut wrapper = ProfileWrapper::new(None);
+//!
+//!     let id = "1".to_string();
+//!     let profile = wrapper.get_user(id).await.unwrap();
 //!
 //!     println!("hello, {}!", profile.username);
 //! }
@@ -38,7 +41,7 @@
 //!
 //! ## example
 //!
-//! the code snippet below is taken directly from `examples/get_profile.rs`!
+//! the code snippet below is taken from `examples/get_user.rs`!
 //!
 //! ```rust
 //! use luduvo_rs::users::profile::ProfileWrapper;
@@ -46,9 +49,9 @@
 //! #[tokio::main]
 //! async fn main() {
 //!     let mut wrapper = ProfileWrapper::new(None);
-//!     let id = "1";
+//!     let id = "1".to_string();
 //!
-//!     match wrapper.get_profile(id).await {
+//!     match wrapper.get_user(id.clone()).await {
 //!         Ok(profile) => {
 //!             println!("profile for id `{id}`: {:#?}", profile);
 //!         }
@@ -63,6 +66,10 @@
 //! }
 //! ```
 //!
+//! ## contributors
+//!
+//! - [Eeviika](https://github.com/Eeviika) for [#1](https://github.com/Primiti-ve/luduvo-rs/pull/1) (Small changes)
+//!
 //! ## need help?
 //!
 //! - contact me on discord! my discord username is `@primiti_ve`.
@@ -73,4 +80,6 @@
 #![allow(unused)]
 
 pub mod prelude;
+
+#[cfg(feature = "users")]
 pub mod users;
