@@ -155,14 +155,51 @@ impl FriendsCache {
     }
 }
 
+/// the configuration for the [`FriendsWrapper`] struct
+///
+/// # arguments
+///
+/// * `client` - the [`reqwest::Client`] to use
+/// * `base_url` - the base url of the api
+/// * `cache_timeout` - the amount of time it takes for cache entries to go stale
+#[derive(Clone)]
+pub struct FriendsConfig {
+    client: Client,
+    base_url: String,
+    cache_timeout: u64,
+}
+
+impl FriendsConfig {
+    pub fn new(
+        client: Option<Client>,
+        base_url: Option<String>,
+        cache_timeout: Option<u64>,
+    ) -> FriendsConfig {
+        FriendsConfig {
+            client: client.unwrap_or_default(),
+            base_url: base_url.unwrap_or_default(),
+            cache_timeout: cache_timeout.unwrap_or_default(),
+        }
+    }
+}
+
+impl Default for FriendsConfig {
+    fn default() -> FriendsConfig {
+        FriendsConfig {
+            client: Client::new(),
+            base_url: BASE_URL.to_string(),
+            cache_timeout: 30_u64, // clippy was complaining about me using "30 as u64"
+        }
+    }
+}
+
 /// a client for interacting with the luduvo friends api.
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
 pub struct FriendsWrapper {
-    client: Client,
+    config: FriendsConfig,
     cache: FriendsCache,
-    base_url: String,
 }
 
 impl FriendsWrapper {
@@ -175,69 +212,16 @@ impl FriendsWrapper {
     ///
     /// # arguments
     ///
-    /// * `cache_timeout` - the cache timeout in seconds. if `None`, defaults to 30 seconds.
+    /// * `config` - the [`FriendsConfig`] to use.
     ///
     /// # returns
     ///
     /// - a new [`FriendsWrapper`] instance if successful
-    pub fn new(cache_timeout: Option<u64>) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = FriendsCache::new(cache_timeout);
+    pub fn new(config: Option<FriendsConfig>) -> Self {
+        let config = config.unwrap_or_default();
+        let cache = FriendsCache::new(config.cache_timeout);
 
-        Self {
-            client: Client::new(),
-            cache,
-            base_url: BASE_URL.to_string(),
-        }
-    }
-
-    /// creates a new [`FriendsWrapper`] with a provided reqwest client.
-    ///
-    /// # notes
-    ///
-    /// - the user is responsible for managing the http client.
-    ///
-    /// # arguments
-    ///
-    /// * `client` - the reqwest client to use for HTTP requests.
-    /// * `cache_timeout` - the cache timeout in seconds.
-    ///
-    /// # returns
-    ///
-    /// - a new [`FriendsWrapper`] instance if successful
-    pub fn new_with_client(client: Client, cache_timeout: Option<u64>) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = FriendsCache::new(cache_timeout);
-
-        Self {
-            client,
-            cache,
-            base_url: BASE_URL.to_string(),
-        }
-    }
-
-    /// creates a new [`FriendsWrapper`] with a provided base url.
-    ///
-    /// # notes
-    ///
-    /// - the user is responsible for making sure the url follows the schema of the luduvo api.
-    ///
-    /// # arguments
-    ///
-    /// * `cache_timeout` - the cache timeout in seconds.
-    ///
-    /// # returns
-    ///
-    /// - a new [`FriendsWrapper`] instance if successful
-    pub fn new_with_base_url(cache_timeout: Option<u64>, base_url: String) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = FriendsCache::new(cache_timeout);
-
-        Self {
-            client: Client::new(),
-            cache,
-            base_url,
-        }
+        Self { config, cache }
     }
 
     /// fetches a users friends by id.
@@ -288,8 +272,8 @@ impl FriendsWrapper {
             return Ok(friends);
         }
 
-        let url = format!("{}/{}/friends", self.base_url, id);
-        let response = self.client.get(&url).send().await?;
+        let url = format!("{}/{}/friends", self.config.base_url, id);
+        let response = self.config.client.get(&url).send().await?;
 
         let status = response.status();
 

@@ -7,7 +7,13 @@ use wiremock::{
 };
 
 fn setup_wrapper(server: &MockServer) -> QueryWrapper {
-    QueryWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))
+    let config = QueryConfig::new(
+        None,
+        Some(format!("{}/users", server.uri())),
+        Some(1)
+    );
+    
+    QueryWrapper::new(Some(config))
 }
 
 fn mock_query_body() -> serde_json::Value {
@@ -99,7 +105,7 @@ async fn get_query_cache_expiration() {
         .mount(&server)
         .await;
 
-    let mut wrapper = QueryWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
+    let mut wrapper = setup_wrapper(&server);
     let _ = wrapper.get_user("Luduvo".to_string(), None).await.unwrap();
 
     time::sleep(std::time::Duration::from_secs(2)).await;

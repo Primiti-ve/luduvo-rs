@@ -228,14 +228,55 @@ impl ProfileCache {
     }
 }
 
+/// the configuration for the [`ProfileWrapper`] struct
+/// 
+/// # arguments
+/// 
+/// * `client` - the [`reqwest::Client`] to use
+/// * `base_url` - the base url of the api
+/// * `cache_timeout` - the amount of time it takes for cache entries to go stale
+#[derive(Clone)]
+pub struct ProfileConfig {
+    client: Client,
+    base_url: String,
+    cache_timeout: u64
+}
+
+impl ProfileConfig {
+    pub fn new(client: Option<Client>, base_url: Option<String>, cache_timeout: Option<u64>) -> ProfileConfig {
+        let client = client.unwrap_or_default();
+        let base_url = base_url.unwrap_or_default();
+        let cache_timeout = cache_timeout.unwrap_or_default();
+        
+        ProfileConfig {
+            client,
+            base_url,
+            cache_timeout
+        }
+    }
+}
+
+impl Default for ProfileConfig {
+    fn default() -> ProfileConfig {
+        let client = Client::new();
+        let base_url = BASE_URL.to_string();
+        let cache_timeout = 30_u64;
+        
+        ProfileConfig {
+            client,
+            base_url,
+            cache_timeout
+        }
+    }
+}
+
 /// a client for interacting with the luduvo user profile api.
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
 pub struct ProfileWrapper {
-    client: Client,
+    config: ProfileConfig,
     cache: ProfileCache,
-    base_url: String,
 }
 
 impl ProfileWrapper {
@@ -248,68 +289,18 @@ impl ProfileWrapper {
     ///
     /// # arguments
     ///
-    /// * `cache_timeout` - the cache timeout in seconds. if `None`, defaults to 30 seconds.
+    /// * `config` - the [`ProfileConfig`] to use.
     ///
     /// # returns
     ///
     /// - a new [`ProfileWrapper`] instance if successful
-    pub fn new(cache_timeout: Option<u64>) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = ProfileCache::new(cache_timeout);
+    pub fn new(config: Option<ProfileConfig>) -> Self {
+        let config = config.unwrap_or_default();
+        let cache = ProfileCache::new(config.cache_timeout);
 
         Self {
-            client: Client::new(),
+            config,
             cache,
-            base_url: BASE_URL.to_string(),
-        }
-    }
-
-    /// creates a new [`ProfileWrapper`] with a provided reqwest client.
-    ///
-    /// # notes
-    ///
-    /// - the user is responsible for managing the http client.
-    ///
-    /// # arguments
-    ///
-    /// * `client` - the reqwest client to use for HTTP requests.
-    /// * `cache_timeout` - the cache timeout in seconds.
-    ///
-    /// # returns
-    ///
-    /// - a new [`ProfileWrapper`] instance if successful
-    pub fn new_with_client(client: Client, cache_timeout: Option<u64>) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = ProfileCache::new(cache_timeout);
-
-        Self {
-            client,
-            cache,
-            base_url: BASE_URL.to_string(),
-        }
-    }
-
-    /// creates a new [`ProfileWrapper`] with a provided base url.
-    ///
-    /// # notes
-    ///
-    /// - the user is responsible for making sure the url follows the schema of the luduvo api.
-    ///
-    /// # arguments
-    ///
-    /// * `cache_timeout` - the cache timeout in seconds.
-    ///
-    /// # returns
-    ///
-    /// - a new [`ProfileWrapper`] instance if successful
-    pub fn new_with_base_url(cache_timeout: Option<u64>, base_url: String) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = ProfileCache::new(cache_timeout);
-
-        Self {
-            client: Client::new(),
-            cache,
-            base_url,
         }
     }
 
@@ -361,8 +352,8 @@ impl ProfileWrapper {
             return Ok(profile);
         }
 
-        let url = format!("{}/{}/profile", self.base_url, id);
-        let response = self.client.get(&url).send().await?;
+        let url = format!("{}/{}/profile", self.config.base_url, id);
+        let response = self.config.client.get(&url).send().await?;
 
         let status = response.status();
 

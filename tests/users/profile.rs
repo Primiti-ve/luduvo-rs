@@ -7,7 +7,13 @@ use wiremock::{
 };
 
 fn setup_wrapper(server: &MockServer) -> ProfileWrapper {
-    ProfileWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))
+    let config = ProfileConfig::new(
+        None,
+        Some(format!("{}/users", server.uri())),
+        Some(1)
+    );
+    
+    ProfileWrapper::new(Some(config))
 }
 
 fn mock_profile_body() -> serde_json::Value {
@@ -217,7 +223,7 @@ async fn get_profile_cache_expiration() {
         .mount(&server)
         .await;
 
-    let mut wrapper = ProfileWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
+    let mut wrapper = setup_wrapper(&server);
     let _ = wrapper.get_user("1".to_string()).await.unwrap();
 
     time::sleep(std::time::Duration::from_secs(2)).await;

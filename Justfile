@@ -10,3 +10,6 @@ release version description:
     git commit -m "{{version}}" -m "description"
     git tag "{{version}}"
     git push origin main --tags
+
+test:
+    cargo test --tests

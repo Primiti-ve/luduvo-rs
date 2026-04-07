@@ -69,10 +69,10 @@
 //! this avoids namespace pollution and makes dependencies clearer.
 
 #[cfg(feature = "friends")]
-pub use super::users::friends::{Friends, FriendsError, FriendsWrapper};
+pub use super::users::friends::{Friends, FriendsError, FriendsWrapper, FriendsConfig};
 
 #[cfg(feature = "profile")]
-pub use super::users::profile::{Profile, ProfileError, ProfileWrapper};
+pub use super::users::profile::{Profile, ProfileError, ProfileWrapper, ProfileConfig};
 
 #[cfg(feature = "query")]
-pub use super::users::query::{Query, QueryError, QueryWrapper};
+pub use super::users::query::{Query, QueryError, QueryWrapper, QueryConfig};

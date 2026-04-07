@@ -6,7 +6,13 @@ use wiremock::{
 };
 
 fn setup_wrapper(server: &MockServer) -> FriendsWrapper {
-    FriendsWrapper::new_with_base_url(Some(60), format!("{}/users", server.uri()))
+    let config = FriendsConfig::new(
+        None,
+        Some(format!("{}/users", server.uri())),
+        Some(1)
+    );
+    
+    FriendsWrapper::new(Some(config))
 }
 
 fn mock_profile_body() -> serde_json::Value {
@@ -163,7 +169,7 @@ async fn get_friends_cache_expiration() {
         .mount(&server)
         .await;
 
-    let mut wrapper = FriendsWrapper::new_with_base_url(Some(1), format!("{}/users", server.uri()));
+    let mut wrapper = setup_wrapper(&server);
     let _ = wrapper.get_friends("1".to_string()).await.unwrap();
 
     tokio::time::sleep(std::time::Duration::from_secs(2)).await;

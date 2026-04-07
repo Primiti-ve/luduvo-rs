@@ -158,14 +158,55 @@ impl QueryCache {
     }
 }
 
+/// the configuration for the [`QueryWrapper`] struct
+/// 
+/// # arguments
+/// 
+/// * `client` - the [`reqwest::Client`] to use
+/// * `base_url` - the base url of the api
+/// * `cache_timeout` - the amount of time it takes for cache entries to go stale
+#[derive(Clone)]
+pub struct QueryConfig {
+    client: Client,
+    base_url: String,
+    cache_timeout: u64
+}
+
+impl QueryConfig {
+    pub fn new(client: Option<Client>, base_url: Option<String>, cache_timeout: Option<u64>) -> QueryConfig {
+        let client = client.unwrap_or_default();
+        let base_url = base_url.unwrap_or_default();
+        let cache_timeout = cache_timeout.unwrap_or_default();
+        
+        QueryConfig {
+            client,
+            base_url,
+            cache_timeout
+        }
+    }
+}
+
+impl Default for QueryConfig {
+    fn default() -> QueryConfig {
+        let client = Client::new();
+        let base_url = BASE_URL.to_string();
+        let cache_timeout = 30_u64;
+        
+        QueryConfig {
+            client,
+            base_url,
+            cache_timeout
+        }
+    }
+}
+
 /// a client for interacting with the luduvo profile querying api.
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
 pub struct QueryWrapper {
-    client: Client,
+    config: QueryConfig,
     cache: QueryCache,
-    base_url: String,
 }
 
 impl QueryWrapper {
@@ -174,72 +215,22 @@ impl QueryWrapper {
     /// # notes
     ///
     /// - this internally initializes a reusable [`reqwest::Client`] to perform HTTP requests, which is **not** publicly exposed.
-    /// - this internally manages the cache for profile data. the cache is not publicly exposed.
+    /// - this internally manages the cache for query data. the cache is not publicly exposed.
     ///
     /// # arguments
     ///
-    /// * `cache_timeout` - the cache timeout in seconds. if `None`, defaults to 30 seconds.
+    /// * `config` - the [`QueryConfig`] to use.
     ///
     /// # returns
     ///
     /// - a new [`QueryWrapper`] instance if successful
-    pub fn new(cache_timeout: Option<u64>) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = QueryCache::new(cache_timeout);
+    pub fn new(config: Option<QueryConfig>) -> Self {
+        let config = config.unwrap_or_default();
+        let cache = QueryCache::new(config.cache_timeout);
 
         Self {
-            client: Client::new(),
+            config,
             cache,
-            base_url: BASE_URL.to_string(),
-        }
-    }
-
-    /// creates a new [`QueryWrapper`] with a provided reqwest client.
-    ///
-    /// # notes
-    ///
-    /// - the user is responsible for managing the http client.
-    ///
-    /// # arguments
-    ///
-    /// * `client` - the reqwest client to use for HTTP requests.
-    /// * `cache_timeout` - the cache timeout in seconds.
-    ///
-    /// # returns
-    ///
-    /// - a new [`QueryWrapper`] instance if successful
-    pub fn new_with_client(client: Client, cache_timeout: Option<u64>) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = QueryCache::new(cache_timeout);
-
-        Self {
-            client,
-            cache,
-            base_url: BASE_URL.to_string(),
-        }
-    }
-
-    /// creates a new [`QueryWrapper`] with a provided base url.
-    ///
-    /// # notes
-    ///
-    /// - the user is responsible for making sure the url follows the schema of the luduvo api.
-    ///
-    /// # arguments
-    ///
-    /// * `cache_timeout` - the cache timeout in seconds.
-    ///
-    /// # returns
-    ///
-    /// - a new [`QueryWrapper`] instance if successful
-    pub fn new_with_base_url(cache_timeout: Option<u64>, base_url: String) -> Self {
-        let cache_timeout = cache_timeout.unwrap_or(30);
-        let cache = QueryCache::new(cache_timeout);
-
-        Self {
-            client: Client::new(),
-            cache,
-            base_url,
         }
     }
 
@@ -293,8 +284,8 @@ impl QueryWrapper {
 
         let limit = limit.unwrap_or("1".to_string());
 
-        let url = format!("{}?q={}&limit={}", self.base_url, query, limit);
-        let response = self.client.get(&url).send().await?;
+        let url = format!("{}?q={}&limit={}", self.config.base_url, query, limit);
+        let response = self.config.client.get(&url).send().await?;
 
         let status = response.status();
 
