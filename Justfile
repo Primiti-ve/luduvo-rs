@@ -9,7 +9,7 @@ release version description:
     git add -A
     git commit -m "{{version}}" -m "description"
     git tag "{{version}}"
-    git push origin main --tags
+    git push origin main --tags --force
 
 test:
     cargo test --tests
