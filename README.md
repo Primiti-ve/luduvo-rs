@@ -10,6 +10,10 @@
 
 ## notes
 
+> [!IMPORTANT]
+> this library is in a pre-1.0.0 stage.
+> expect breaking changes between versions!
+
 > [!WARNING]
 > this crate is completely fanmade and has no affiliation with the luduvo devs.
 
