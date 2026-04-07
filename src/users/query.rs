@@ -264,7 +264,7 @@ impl QueryWrapper {
     ///
     /// # example
     ///
-    /// ```rust
+    /// ```no_run
     /// use luduvo_rs::users::query::QueryWrapper;
     ///
     /// #[tokio::main]

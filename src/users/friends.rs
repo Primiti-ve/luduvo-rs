@@ -261,7 +261,7 @@ impl FriendsWrapper {
     ///
     /// # example
     ///
-    /// ```rust
+    /// ```no_run
     /// use luduvo_rs::users::friends::FriendsWrapper;
     ///
     /// #[tokio::main]

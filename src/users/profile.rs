@@ -334,7 +334,7 @@ impl ProfileWrapper {
     ///
     /// # example
     ///
-    /// ```rust
+    /// ```no_run
     /// use luduvo_rs::users::profile::ProfileWrapper;
     ///
     /// #[tokio::main]

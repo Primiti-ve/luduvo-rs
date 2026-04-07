@@ -25,7 +25,7 @@
 //!
 //! ## quick start
 //!
-//! ```rust
+//! ```no_run
 //! use luduvo_rs::prelude::*;
 //!
 //! #[tokio::main]
@@ -43,7 +43,7 @@
 //!
 //! the code snippet below is taken from `examples/get_user.rs`!
 //!
-//! ```rust
+//! ```no_run
 //! use luduvo_rs::users::profile::ProfileWrapper;
 //!
 //! #[tokio::main]

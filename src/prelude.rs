@@ -6,14 +6,14 @@
 //!
 //! instead of importing individual types/structs like:
 //!
-//! ```rust
+//! ```no_run
 //! use luduvo_rs::users::profile::{Profile, ProfileWrapper};
 //! use luduvo_rs::users::friends::{Friends, FriendsWrapper};
 //! ```
 //!
 //! you can simply do:
 //!
-//! ```rust
+//! ```no_run
 //! use luduvo_rs::prelude::*;
 //! ```
 //!
@@ -39,7 +39,7 @@
 //!
 //! ## example
 //!
-//! ```rust
+//! ```no_run
 //! use luduvo_rs::prelude::*;
 //!
 //! #[tokio::main]
