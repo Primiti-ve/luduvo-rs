@@ -12,7 +12,7 @@ fn setup_wrapper(server: &MockServer) -> ProfileWrapper {
         Some(format!("{}/users", server.uri())),
         Some(1)
     );
-    
+
     ProfileWrapper::new(Some(config))
 }
 
@@ -154,7 +154,6 @@ async fn get_profile_server_error() {
     match wrapper.get_user("1".to_string()).await {
         Err(ProfileError::RequestFailed(_)) => {}
         Err(ProfileError::InternalError(_)) => {}
-        Err(ProfileError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }
@@ -175,7 +174,6 @@ async fn get_profile_invalid_json() {
     match wrapper.get_user("1".to_string()).await {
         Err(ProfileError::RequestFailed(_)) => {}
         Err(ProfileError::InternalError(_)) => {}
-        Err(ProfileError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }

@@ -130,7 +130,6 @@ async fn get_query_server_error() {
     match wrapper.get_user("Luduvo".to_string(), None).await {
         Err(QueryError::RequestFailed(_)) => {}
         Err(QueryError::InternalError(_)) => {}
-        Err(QueryError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }
@@ -153,7 +152,6 @@ async fn get_query_invalid_json() {
     match wrapper.get_user("Luduvo".to_string(), None).await {
         Err(QueryError::RequestFailed(_)) => {}
         Err(QueryError::InternalError(_)) => {}
-        Err(QueryError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }

@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
         
       - name: check if version already exists
-        run: cargo publish --dry-run
+        run: cargo publish --dry-run --allow-dirty
 
       - name: publish
         run: cargo publish --verbose

@@ -79,6 +79,7 @@
 
 #![allow(unused)]
 
+#[cfg(feature = "prelude")]
 pub mod prelude;
 
 #[cfg(feature = "users")]

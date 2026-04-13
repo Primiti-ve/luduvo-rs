@@ -1,0 +1,12 @@
+[project]
+name = "luduvo-rs"
+version = "0.4.0"
+description = "luduvo-rs is a rust library designed for interacting with the luduvo api."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "zensical>=0.0.32",
+]

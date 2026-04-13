@@ -1,4 +1,4 @@
-name: ldh webhook
+name: ldh_webhook
 on: [push, pull_request]
 
 jobs:

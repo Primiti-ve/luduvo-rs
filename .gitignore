@@ -1,1 +1,6 @@
 /target
+*.lock
+.python-version
+.cache
+.venv
+site

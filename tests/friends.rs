@@ -130,7 +130,6 @@ async fn get_friends_server_error() {
     match wrapper.get_friends("1".to_string()).await {
         Err(FriendsError::RequestFailed(_)) => {}
         Err(FriendsError::InternalError(_)) => {}
-        Err(FriendsError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }
@@ -151,7 +150,6 @@ async fn get_friends_invalid_json() {
     match wrapper.get_friends("1".to_string()).await {
         Err(FriendsError::RequestFailed(_)) => {}
         Err(FriendsError::InternalError(_)) => {}
-        Err(FriendsError::RequestFailed(_)) => {}
 
         other => panic!("expected RequestFailed, got {:?}", other),
     }

@@ -1,8 +1,14 @@
-<img src="https://github.com/Primiti-ve/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs" height=256/>
+<p align="center">
+  <img src="https://github.com/Primiti-ve/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs wordmark" height="256"/>
+</p>
 
-*luduvo-rs* is a rust library designed for interacting with the [luduvo](luduvo.com) api.
+<p align="center">
+  <i>luduvo-rs</i> is a rust library designed for interacting with the [luduvo](luduvo.com) api.
+</p>
 
-[crates.io](https://crates.io/crates/luduvo-rs) | [docs.rs](https://docs.rs/luduvo-rs/latest/luduvo_rs) | [luduvo development hub](https://discord.gg/FcjTvuWKRk)
+<p align="center">
+  <a href="https://crates.io/crates/luduvo-rs">crates.io</a> | <a href="https://discord.gg/FcjTvuWKRk">luduvo development hub</a>
+</p>
 
 ---
 
@@ -10,19 +16,14 @@
 > this crate is completely fanmade and has no affiliation with the luduvo devs.
 
 > [!IMPORTANT]
-> this library is in a pre-1.0.0 stage.
-> 
-> expect breaking changes between versions!
-
-> [!TIP]
-> most users will want to import the prelude, via `luduvo_rs::prelude::*`
-
-> [!NOTE]
-> this crate is MIT-licensed. feel free to do whatever with it! all contributions (pull requests, issues) are welcomed.
+> this library is in a pre-1.0.0 state! expect breaking changes between versions.
 
 ---
 
 ## features
+
+> [!TIP]
+> most users will want to import the prelude, via `luduvo_rs::prelude::*`
 
 - user profile data (search by id, one result)
 - user friends data (search by id, multiple results)
@@ -30,9 +31,6 @@
 - places data (search by name, multiple results)
 
 ## quick start
-
-> [!NOTE]
-> the code snippet below uses the prelude, which re-exports commonly used structs!
 
 ```rust
 use luduvo_rs::prelude::*;
@@ -50,11 +48,13 @@ async fn main() {
 
 ## contributors
 
+> [!NOTE]
+> this crate is MIT-licensed. feel free to do whatever with it! all contributions (pull requests, issues) are welcomed, including to the docs.
+
 - [Eeviika](https://github.com/Eeviika) for [#1](https://github.com/Primiti-ve/luduvo-rs/pull/1) (Small changes)
 
 ## need help?
 
 - contact me on discord! my discord username is `@primiti_ve`.
-  - ping me in the [luduvo discord](https://discord.gg/luduvo).
-  - join the [luduvo development hub](https://discord.gg/FcjTvuWKRk).
-- [create an issue](https://github.com/Primiti-ve/luduvo-rs/issues).
+    - my preferred method of communication is joining the [luduvo development hub](https://discord.gg/FcjTvuWKRk)! it's full of like-minded developers who will gladly help you out with any issues.
+- [create an issue](https://github.com/Primiti-ve/luduvo-rs/issues)! this is better for organisation purposes, although you should also join the luduvo development hub aswell.
