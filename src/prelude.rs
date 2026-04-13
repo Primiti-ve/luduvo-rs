@@ -76,3 +76,6 @@ pub use super::users::profile::{Profile, ProfileError, ProfileWrapper, ProfileCo
 
 #[cfg(feature = "query")]
 pub use super::users::query::{Query, QueryError, QueryWrapper, QueryConfig};
+
+#[cfg(feature = "places")]
+pub use super::places::{Place, Places, PlacesError, PlacesWrapper, PlacesConfig};

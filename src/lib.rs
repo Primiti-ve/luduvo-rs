@@ -83,3 +83,6 @@ pub mod prelude;
 
 #[cfg(feature = "users")]
 pub mod users;
+
+#[cfg(feature = "places")]
+pub mod places;

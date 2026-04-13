@@ -159,9 +159,9 @@ impl QueryCache {
 }
 
 /// the configuration for the [`QueryWrapper`] struct
-/// 
+///
 /// # arguments
-/// 
+///
 /// * `client` - the [`reqwest::Client`] to use
 /// * `base_url` - the base url of the api
 /// * `cache_timeout` - the amount of time it takes for cache entries to go stale
@@ -177,7 +177,7 @@ impl QueryConfig {
         let client = client.unwrap_or_default();
         let base_url = base_url.unwrap_or_default();
         let cache_timeout = cache_timeout.unwrap_or_default();
-        
+
         QueryConfig {
             client,
             base_url,
@@ -191,7 +191,7 @@ impl Default for QueryConfig {
         let client = Client::new();
         let base_url = BASE_URL.to_string();
         let cache_timeout = 30_u64;
-        
+
         QueryConfig {
             client,
             base_url,
@@ -282,7 +282,7 @@ impl QueryWrapper {
             return Ok(users);
         }
 
-        let limit = limit.unwrap_or("1".to_string());
+        let limit = limit.unwrap_or("20".to_string());
 
         let url = format!("{}?q={}&limit={}", self.config.base_url, query, limit);
         let response = self.config.client.get(&url).send().await?;

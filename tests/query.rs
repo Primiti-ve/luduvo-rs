@@ -12,7 +12,7 @@ fn setup_wrapper(server: &MockServer) -> QueryWrapper {
         Some(format!("{}/users", server.uri())),
         Some(1)
     );
-    
+
     QueryWrapper::new(Some(config))
 }
 
@@ -37,7 +37,7 @@ async fn get_query_success() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "1"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(200).set_body_json(mock_query_body()))
         .mount(&server)
         .await;
@@ -57,7 +57,7 @@ async fn get_query_rate_limited() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "10"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(429))
         .mount(&server)
         .await;
@@ -80,7 +80,7 @@ async fn get_query_cache_hit() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "1"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(200).set_body_json(mock_query_body()))
         .expect(1)
         .mount(&server)
@@ -99,7 +99,7 @@ async fn get_query_cache_expiration() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "1"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(200).set_body_json(mock_query_body()))
         .expect(2)
         .mount(&server)
@@ -120,7 +120,7 @@ async fn get_query_server_error() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "10"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(500))
         .mount(&server)
         .await;
@@ -143,7 +143,7 @@ async fn get_query_invalid_json() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "10"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(200).set_body_string("invalid json"))
         .mount(&server)
         .await;
@@ -166,7 +166,7 @@ async fn query_fields_are_valid() {
     Mock::given(method("GET"))
         .and(path("/users"))
         .and(query_param("q", "Luduvo"))
-        .and(query_param("limit", "1"))
+        .and(query_param("limit", "20"))
         .respond_with(ResponseTemplate::new(200).set_body_json(mock_query_body()))
         .mount(&server)
         .await;

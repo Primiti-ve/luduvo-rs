@@ -2,15 +2,14 @@
 
 *luduvo-rs* is a rust library designed for interacting with the [luduvo](luduvo.com) api.
 
+[crates.io](https://crates.io/crates/luduvo-rs) | [docs.rs](https://docs.rs/luduvo-rs/latest/luduvo_rs) | [luduvo development hub](https://discord.gg/FcjTvuWKRk)
+
+> [!WARNING]
+> this crate is completely fanmade and has no affiliation with the luduvo devs.
+
 > [!IMPORTANT]
 > this library is in a pre-1.0.0 stage.
 > expect breaking changes between versions!
-
-## links
-
-- [crates.io](https://crates.io/crates/luduvo-rs)
-- [docs.rs](https://docs.rs/luduvo-rs/latest/luduvo_rs)
-- [luduvo development hub](https://discord.gg/FcjTvuWKRk)
 
 ## notes
 
@@ -24,9 +23,6 @@
 > this crate is MIT-licensed. feel free to do whatever with it!
 > 
 > all contributions (pull requests, issues) are welcomed.
-
-> [!WARNING]
-> this crate is completely fanmade and has no affiliation with the luduvo devs.
 
 ## features
 

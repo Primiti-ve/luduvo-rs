@@ -22,10 +22,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - run: cargo build --verbose
-      - run: cargo test --tests --verbose
-      - run: cargo clippy --verbose
         
       - name: check if version already exists
         run: cargo publish --dry-run

@@ -52,10 +52,10 @@ pub struct Friends {
     /// the list of friends the user has.
     pub friends: Vec<Friend>,
 
-    /// the total amount of friends the user has.
+    /// the total amount of friends given.
     pub total: u64,
 
-    /// the total amount of friends the user can have at a time.
+    /// the total amount of friends requested.
     pub limit: u64,
 
     /// the current page of friends.
