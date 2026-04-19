@@ -1,4 +1,4 @@
-use luduvo_rs::users::query::QueryWrapper;
+use luduvo_rs::users::query::Client;
 use std::env;
 
 #[tokio::main]
@@ -12,9 +12,9 @@ async fn main() {
         &args[1]
     }.to_string();
 
-    let mut wrapper = QueryWrapper::new(None);
+    let mut client = Client::new(None);
 
-    match wrapper.get_user(username.clone(), None).await {
+    match client.get_user(username.clone(), None).await {
         Ok(profile) => {
             println!("profile for username `{username}`: {:#?}", profile);
         }

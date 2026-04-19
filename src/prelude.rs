@@ -23,18 +23,18 @@
 //!
 //! ### profile api
 //! - [`Profile`]
-//! - [`ProfileWrapper`]
+//! - [`ProfileClient`]
 //! - [`ProfileError`]
 //!
 //! ### friends api
 //! - [`Friends`]
-//! - [`FriendsWrapper`]
+//! - [`FriendsClient`]
 //! - [`FriendsError`]
 //!
 //!
 //! ### query api
 //! - [`Query`]
-//! - [`QueryWrapper`]
+//! - [`QueryClient`]
 //! - [`QueryError`]
 //!
 //! ## example
@@ -44,10 +44,10 @@
 //!
 //! #[tokio::main]
 //! async fn main() {
-//!     let mut wrapper = ProfileWrapper::new(None);
+//!     let mut client = ProfileClient::new(None);
 //!     let id = "1".to_string();
 //!
-//!     match wrapper.get_user(id.clone()).await {
+//!     match client.get_user(id.clone()).await {
 //!         Ok(profile) => {
 //!             println!("profile for id `{id}`: {:#?}", profile);
 //!         }
@@ -69,13 +69,21 @@
 //! this avoids namespace pollution and makes dependencies clearer.
 
 #[cfg(feature = "friends")]
-pub use super::users::friends::{Friends, FriendsError, FriendsWrapper, FriendsConfig};
+pub use super::users::friends::{
+    Client as FriendsClient, Config as FriendsConfig, Error as FriendsError, Friends,
+};
 
 #[cfg(feature = "profile")]
-pub use super::users::profile::{Profile, ProfileError, ProfileWrapper, ProfileConfig};
+pub use super::users::profile::{
+    Client as ProfileClient, Config as ProfileConfig, Error as ProfileError, Profile,
+};
 
 #[cfg(feature = "query")]
-pub use super::users::query::{Query, QueryError, QueryWrapper, QueryConfig};
+pub use super::users::query::{
+    Client as QueryClient, Config as QueryConfig, Error as QueryError, Query,
+};
 
 #[cfg(feature = "places")]
-pub use super::places::{Place, Places, PlacesError, PlacesWrapper, PlacesConfig};
+pub use super::places::{
+    Client as PlacesClient, Config as PlacesConfig, Error as PlacesError, Place, Places,
+};

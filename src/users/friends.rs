@@ -2,7 +2,7 @@
 //!
 //! this module contains structs related to luduvo friends data.
 
-use reqwest::{Client, StatusCode};
+use reqwest::{Client as ReqwestClient, StatusCode};
 use serde::Deserialize;
 use std::{
     collections::HashMap,
@@ -14,7 +14,7 @@ use super::BASE_URL;
 
 /// errors that can occur when fetching the friends data.
 #[derive(Error, Debug)]
-pub enum FriendsError {
+pub enum Error {
     /// the result with the specified id was not found.
     #[error("result with id `{0}` not found")]
     ResultNotFound(String),
@@ -64,25 +64,25 @@ pub struct Friends {
 
 /// a cached friends entry, containing the user's friends data and its last updated timestamp.
 ///
-/// this is used internally by [`FriendsCache`] to store friends data.
+/// this is used internally by [`Cache`] to store friends data.
 #[derive(Clone)]
-pub struct CachedFriends {
+pub struct CacheEntry {
     pub result: Friends,
     pub last_updated: u64,
 }
 
 /// a cache of user friends data, keyed by user id.
 ///
-/// this is used internally by [`FriendsWrapper`] to cache friends.
+/// this is used internally by [`Client`] to cache friends.
 #[derive(Clone)]
-pub struct FriendsCache {
-    cache: HashMap<u64, CachedFriends>,
+pub struct Cache {
+    cache: HashMap<u64, CacheEntry>,
     cache_timeout: u64,
 }
 
-/// the implementation for the friendscache struct.
-impl FriendsCache {
-    /// creates a new [`FriendsCache`] with the specified cache timeout.
+/// the implementation for the Cache struct.
+impl Cache {
+    /// creates a new [`Cache`] with the specified cache timeout.
     ///
     /// # arguments
     ///
@@ -90,7 +90,7 @@ impl FriendsCache {
     ///
     /// # returns
     ///
-    /// - a new [`FriendsCache`] instance
+    /// - a new [`Cache`] instance
     pub fn new(cache_timeout: u64) -> Self {
         Self {
             cache: HashMap::new(),
@@ -137,7 +137,7 @@ impl FriendsCache {
     ///
     /// * `result` - the result to insert.
     pub fn insert(&mut self, id: u64, result: Friends) {
-        let cached = CachedFriends {
+        let cached = CacheEntry {
             result,
             last_updated: Self::now(),
         };
@@ -155,7 +155,7 @@ impl FriendsCache {
     }
 }
 
-/// the configuration for the [`FriendsWrapper`] struct
+/// the configuration for the [`Client`] struct
 ///
 /// # arguments
 ///
@@ -163,19 +163,19 @@ impl FriendsCache {
 /// * `base_url` - the base url of the api
 /// * `cache_timeout` - the amount of time it takes for cache entries to go stale
 #[derive(Clone)]
-pub struct FriendsConfig {
-    client: Client,
+pub struct Config {
+    client: ReqwestClient,
     base_url: String,
     cache_timeout: u64,
 }
 
-impl FriendsConfig {
+impl Config {
     pub fn new(
-        client: Option<Client>,
+        client: Option<ReqwestClient>,
         base_url: Option<String>,
         cache_timeout: Option<u64>,
-    ) -> FriendsConfig {
-        FriendsConfig {
+    ) -> Config {
+        Config {
             client: client.unwrap_or_default(),
             base_url: base_url.unwrap_or_default(),
             cache_timeout: cache_timeout.unwrap_or_default(),
@@ -183,12 +183,12 @@ impl FriendsConfig {
     }
 }
 
-impl Default for FriendsConfig {
-    fn default() -> FriendsConfig {
-        FriendsConfig {
-            client: Client::new(),
+impl Default for Config {
+    fn default() -> Config {
+        Config {
+            client: ReqwestClient::new(),
             base_url: BASE_URL.to_string(),
-            cache_timeout: 30_u64, // clippy was complaining about me using "30 as u64"
+            cache_timeout: 30_u64,
         }
     }
 }
@@ -197,13 +197,13 @@ impl Default for FriendsConfig {
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
-pub struct FriendsWrapper {
-    config: FriendsConfig,
-    cache: FriendsCache,
+pub struct Client {
+    config: Config,
+    cache: Cache,
 }
 
-impl FriendsWrapper {
-    /// creates a new [`FriendsWrapper`].
+impl Client {
+    /// creates a new [`Client`].
     ///
     /// # notes
     ///
@@ -212,14 +212,14 @@ impl FriendsWrapper {
     ///
     /// # arguments
     ///
-    /// * `config` - the [`FriendsConfig`] to use.
+    /// * `config` - the [`Config`] to use.
     ///
     /// # returns
     ///
-    /// - a new [`FriendsWrapper`] instance if successful
-    pub fn new(config: Option<FriendsConfig>) -> Self {
+    /// - a new [`Client`] instance if successful
+    pub fn new(config: Option<Config>) -> Self {
         let config = config.unwrap_or_default();
-        let cache = FriendsCache::new(config.cache_timeout);
+        let cache = Cache::new(config.cache_timeout);
 
         Self { config, cache }
     }
@@ -237,20 +237,20 @@ impl FriendsWrapper {
     /// # errors
     ///
     /// returns:
-    /// - [`FriendsError::ResultNotFound`] if the result does not exist (HTTP 404)
-    /// - [`FriendsError::RequestFailed`] for network or decoding errors
-    /// - [`FriendsError::InvalidId`] if the id is not a valid string
-    /// - [`FriendsError::TooManyRequests`] if the user has sent too many requests within a short timespan
+    /// - [`Error::ResultNotFound`] if the result does not exist (HTTP 404)
+    /// - [`Error::RequestFailed`] for network or decoding errors
+    /// - [`Error::InvalidId`] if the id is not a valid string
+    /// - [`Error::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Friends`] if successful
     ///
     /// # example
     ///
     /// ```no_run
-    /// use luduvo_rs::users::friends::FriendsWrapper;
+    /// use luduvo_rs::users::friends::Client;
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let mut wrapper = FriendsWrapper::new(None);
+    ///     let mut wrapper = Client::new(None);
     ///
     ///     match wrapper.get_friends("1".to_string()).await {
     ///         Ok(friends) => {
@@ -263,10 +263,8 @@ impl FriendsWrapper {
     ///     }
     /// }
     /// ```
-    pub async fn get_friends(&mut self, id: String) -> Result<Friends, FriendsError> {
-        let id_num: u64 = id
-            .parse()
-            .map_err(|_| FriendsError::InvalidId(id.clone()))?;
+    pub async fn get_friends(&mut self, id: String) -> Result<Friends, Error> {
+        let id_num: u64 = id.parse().map_err(|_| Error::InvalidId(id.clone()))?;
 
         if let Some(friends) = self.cache.get(id_num) {
             return Ok(friends);
@@ -278,13 +276,13 @@ impl FriendsWrapper {
         let status = response.status();
 
         if status == StatusCode::NOT_FOUND {
-            return Err(FriendsError::ResultNotFound(id));
+            return Err(Error::ResultNotFound(id));
         } else if status == StatusCode::TOO_MANY_REQUESTS {
-            return Err(FriendsError::TooManyRequests());
+            return Err(Error::TooManyRequests());
         } else if status == StatusCode::INTERNAL_SERVER_ERROR {
             let reason = status.canonical_reason().unwrap_or("no error supplied");
 
-            return Err(FriendsError::InternalError(reason.to_string()));
+            return Err(Error::InternalError(reason.to_string()));
         }
 
         let response = response.error_for_status()?;

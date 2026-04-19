@@ -10,12 +10,12 @@ _this is for searching users by username._ for searching users by id, see the `p
 
 ---
 
-## QueryWrapper
+## Client
 
 a client for interacting with the luduvo profile querying api.
 
 ```rust
-pub struct QueryWrapper {
+pub struct Client {
     /* private fields */
 }
 ```
@@ -24,19 +24,19 @@ pub struct QueryWrapper {
 
 #### new
 
-creates a new `QueryWrapper`.
+creates a new `Client`.
 
 ```rust
-pub fn new(config: Option<QueryConfig>) -> QueryWrapper
+pub fn new(config: Option<Config>) -> Client
 ```
 
 ##### arguments
 
-- `config` - an _optional_ `QueryConfig` to use.
+- `config` - an _optional_ `Config` to use.
 
 ##### returns
 
-- if successful, a `QueryWrapper` instance.
+- if successful, a `Client` instance.
 
 #### get_user
 
@@ -47,7 +47,7 @@ pub async fn get_user(
     &mut self,
     query: String,
     limit: Option<String>,
-) -> Result<Query, QueryError>
+) -> Result<Query, Error>
 ```
 
 ##### arguments
@@ -57,21 +57,21 @@ pub async fn get_user(
 
 ##### returns
 
-- `QueryError::UserNotFound` if the user does not exist (HTTP 404)
-- `QueryError::RequestFailed` for network or decoding errors
-- `QueryError::TooManyRequests` if the user has sent too many requests within a short timespan
+- `Error::UserNotFound` if the user does not exist (HTTP 404)
+- `Error::RequestFailed` for network or decoding errors
+- `Error::TooManyRequests` if the user has sent too many requests within a short timespan
 - if successful, a `Query` instance.
 
 ---
 
-## QueryConfig
+## Config
 
-the configuration for the `QueryWrapper` struct.
+the configuration for the `Client` struct.
 
 __no configuration is publicly exposed through the struct!__
 
 ```rust
-pub struct QueryConfig {
+pub struct Config {
     /* private fields */
 }
 ```
@@ -91,7 +91,7 @@ pub fn new(
     client: Option<Client>,
     base_url: Option<String>,
     cache_timeout: Option<u64>,
-) -> QueryConfig
+) -> Config
 ```
 
 ##### arguments
@@ -103,17 +103,17 @@ pub fn new(
 #### default
 
 ```rust
-pub fn default() -> QueryConfig
+pub fn default() -> Config
 ```
 
 ---
 
-## QueryError
+## Error
 
 a list of errors that can occur when fetching profiles.
 
 ```rust
-pub enum QueryError {
+pub enum Error {
     TooManyRequests(),
     RequestFailed(Error),
     InternalError(String),
@@ -172,14 +172,14 @@ pub struct Query {
 
 ---
 
-## CachedQuery
+## CacheEntry
 
 a cached profile entry, containing a profile and its last updated timestamp.
 
-this is used internally by `QueryCache` to store profile data.
+this is used internally by `Cache` to store profile data.
 
 ```rust
-pub struct CachedQuery {
+pub struct CacheEntry {
     pub users: Query,
     pub last_updated: u64,
 }
@@ -192,14 +192,14 @@ pub struct CachedQuery {
 
 ---
 
-## QueryCache
+## Cache
 
 a cache of user profiles, keyed by the query.
 
-this is used internally by `QueryWrapper` to cache profiles.
+this is used internally by `Client` to cache profiles.
 
 ```rust
-pub struct QueryCache {
+pub struct Cache {
     /* private fields */
 }
 ```
@@ -208,10 +208,10 @@ pub struct QueryCache {
 
 #### new
 
-creates a new `QueryCache` with the specified cache timeout.
+creates a new `Cache` with the specified cache timeout.
 
 ```rust
-pub fn new(cache_timeout: u64) -> QueryCache
+pub fn new(cache_timeout: u64) -> Cache
 ```
 
 ##### arguments
@@ -220,7 +220,7 @@ pub fn new(cache_timeout: u64) -> QueryCache
 
 ##### returns
 
-- a new `QueryCache` instance.
+- a new `Cache` instance.
 
 #### get
 

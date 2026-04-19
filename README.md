@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a href="https://crates.io/crates/luduvo-rs">crates.io</a> | <a href="https://discord.gg/FcjTvuWKRk">luduvo development hub</a>
+  <a href="https://primiti-ve.github.io/luduvo-rs">docs</a> | <a href="https://crates.io/crates/luduvo-rs">crates.io</a> | <a href="https://discord.gg/FcjTvuWKRk">luduvo development hub</a>
 </p>
 
 ---
@@ -37,10 +37,10 @@ use luduvo_rs::prelude::*;
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = ProfileWrapper::new(None);
+    let mut client = ProfileClient::new(None);
 
     let id = "1".to_string();
-    let profile = wrapper.get_user(id).await.unwrap();
+    let profile = client.get_user(id).await.unwrap();
 
     println!("hello, {}!", profile.username);
 }
@@ -58,4 +58,3 @@ async fn main() {
 - contact me on discord! my discord username is `@primiti_ve`.
     - my preferred method of communication is joining the [luduvo development hub](https://discord.gg/FcjTvuWKRk)! it's full of like-minded developers who will gladly help you out with any issues.
 - [create an issue](https://github.com/Primiti-ve/luduvo-rs/issues)! this is better for organisation purposes, although you should also join the luduvo development hub aswell.
-

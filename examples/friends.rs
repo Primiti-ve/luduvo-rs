@@ -1,4 +1,4 @@
-use luduvo_rs::users::friends::FriendsWrapper;
+use luduvo_rs::users::friends::Client;
 use std::env;
 
 #[tokio::main]
@@ -12,9 +12,9 @@ async fn main() {
         &args[1]
     }.to_string();
 
-    let mut wrapper = FriendsWrapper::new(None);
+    let mut client = Client::new(None);
 
-    match wrapper.get_friends(id.clone()).await {
+    match client.get_friends(id.clone()).await {
         Ok(friends) => {
             println!("friends for id `{id}`: {:#?}", friends);
         }

@@ -6,14 +6,14 @@ use wiremock::{
     matchers::{method, path, query_param},
 };
 
-fn setup_wrapper(server: &MockServer) -> QueryWrapper {
+fn setup_wrapper(server: &MockServer) -> QueryClient {
     let config = QueryConfig::new(
         None,
         Some(format!("{}/users", server.uri())),
         Some(1)
     );
 
-    QueryWrapper::new(Some(config))
+    QueryClient::new(Some(config))
 }
 
 fn mock_query_body() -> serde_json::Value {

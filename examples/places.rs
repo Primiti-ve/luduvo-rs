@@ -1,10 +1,10 @@
-use luduvo_rs::places::PlacesWrapper;
+use luduvo_rs::places::Client;
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = PlacesWrapper::new(None);
+    let mut client = Client::new(None);
 
-    match wrapper.get_places("test".to_string(), None).await {
+    match client.get_places("test".to_string(), None).await {
         Ok(friends) => {
             println!("places data: {:#?}", friends);
         }

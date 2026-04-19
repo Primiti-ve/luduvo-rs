@@ -1,4 +1,4 @@
-use luduvo_rs::users::profile::ProfileWrapper;
+use luduvo_rs::users::profile::Client;
 use std::env;
 
 #[tokio::main]
@@ -12,9 +12,9 @@ async fn main() {
         &args[1]
     }.to_string();
 
-    let mut wrapper = ProfileWrapper::new(None);
+    let mut client = Client::new(None);
 
-    match wrapper.get_user(id.clone()).await {
+    match client.get_user(id.clone()).await {
         Ok(profile) => {
             println!("profile for id `{id}`: {:#?}", profile);
         }

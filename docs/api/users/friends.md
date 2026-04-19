@@ -8,14 +8,14 @@ this module contains structs related to luduvo friends data.
 
 ---
 
-## FriendsWrapper
+## Client
 
 a client for interacting with the luduvo friends api.
 
 __the configuration and client aren't publicly exposed through the struct!__
 
 ```rust
-pub struct FriendsWrapper {
+pub struct Client {
     /* private fields */
 }
 ```
@@ -24,24 +24,24 @@ pub struct FriendsWrapper {
 
 #### new
 
-creates a new `FriendsWrapper`.
+creates a new `Client`.
 
 ```rust
-pub fn new(config: Option<FriendsConfig>) -> FriendsWrapper
+pub fn new(config: Option<Config>) -> Client
 ```
 
 ##### arguments
 
-- `config` - an _optional_ `FriendsConfig` to use.
+- `config` - an _optional_ `Config` to use.
 
 ##### returns
 
-- if successful, a `FriendsWrapper` instance.
+- if successful, a `Client` instance.
 
 #### get_friends
 
 ```rust
-pub async fn get_friends(&mut self, id: String) -> Result<Friends, FriendsError>
+pub async fn get_friends(&mut self, id: String) -> Result<Friends, Error>
 ```
 
 fetches a users friends by id.
@@ -52,22 +52,22 @@ fetches a users friends by id.
 
 ##### returns
 
-- `FriendsError::ResultNotFound` if the result does not exist (HTTP 404).
-- `FriendsError::RequestFailed` for network or decoding errors.
-- `FriendsError::InvalidId` if the id is not a valid string.
-- `FriendsError::TooManyRequests` if the user has sent too many requests within a short timespan.
+- `Error::ResultNotFound` if the result does not exist (HTTP 404).
+- `Error::RequestFailed` for network or decoding errors.
+- `Error::InvalidId` if the id is not a valid string.
+- `Error::TooManyRequests` if the user has sent too many requests within a short timespan.
 - if successful, a `Friends` instance.
 
 ---
 
-## FriendsConfig
+## Config
 
-the configuration for the `FriendsWrapper` struct.
+the configuration for the `Client` struct.
 
 __no configuration is publicly exposed through the struct!__
 
 ```rust
-pub struct FriendsConfig {
+pub struct Config {
     /* private fields */
 }
 ```
@@ -87,7 +87,7 @@ pub fn new(
     client: Option<Client>,
     base_url: Option<String>,
     cache_timeout: Option<u64>,
-) -> FriendsConfig
+) -> Config
 ```
 
 ##### arguments
@@ -99,17 +99,17 @@ pub fn new(
 #### default
 
 ```rust
-pub fn default() -> FriendsConfig
+pub fn default() -> Config
 ```
 
 ---
 
-## FriendsError
+## Error
 
 the list of errors that can occur when fetching the friends data.
 
 ```rust
-pub enum FriendsError {
+pub enum Error {
     ResultNotFound(String),
     InvalidId(String),
     TooManyRequests(),
@@ -168,12 +168,12 @@ pub struct Friends {
 
 ---
 
-## CachedFriends
+## CacheEntry
 
 a cached friends entry, containing the user’s friends data and its last updated timestamp.
 
 ```rust
-pub struct CachedFriends {
+pub struct CacheEntry {
     pub result: Friends,
     pub last_updated: u64,
 }
@@ -186,14 +186,14 @@ pub struct CachedFriends {
 
 ---
 
-## FriendsCache
+## Cache
 
 a cache of user friends data, keyed by user id.
 
-this is used internally by `FriendsWrapper` to cache friends.
+this is used internally by `Client` to cache friends.
 
 ```rust
-pub struct FriendsCache {
+pub struct Cache {
     /* private fields */
 }
 ```
@@ -202,15 +202,15 @@ pub struct FriendsCache {
 
 #### new
 ```rust
-pub fn new(cache_timeout: u64) -> FriendsCache
+pub fn new(cache_timeout: u64) -> Cache
 ```
-creates a new `FriendsCache` with the specified cache timeout.
+creates a new `Cache` with the specified cache timeout.
 
 ##### arguments
   - `cache_timeout` - a `u64` detailing the cache timeout in seconds.
 
 ##### returns
-  - a new `FriendsCache` instance
+  - a new `Cache` instance
 
 #### get
 ```rust

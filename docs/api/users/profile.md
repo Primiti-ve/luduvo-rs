@@ -6,18 +6,18 @@ icon: lucide/user
 
 this module contains structs related to fetching a single luduvo user at once.
 
-_this is for searching users by id._ for searching users by username, use a `QueryWrapper` with a limit of `1`.
+_this is for searching users by id._ for searching users by username, use a `QueryClient` with a limit of `1`.
 
 ---
 
-## ProfileWrapper
+## Client
 
 a client for interacting with the luduvo user profile api.
 
 __the configuration and client aren't publicly exposed through the struct!__
 
 ```rust
-pub struct ProfileWrapper {
+pub struct Client {
     /* private fields */
 }
 ```
@@ -26,24 +26,24 @@ pub struct ProfileWrapper {
 
 #### new
 
-creates a new `ProfileWrapper`.
+creates a new `Client`.
 
 ```rust
-pub fn new(config: Option<ProfileConfig>) -> ProfileWrapper
+pub fn new(config: Option<Config>) -> Client
 ```
 
 ##### arguments
 
-- `config` - an _optional_ `ProfileConfig` to use.
+- `config` - an _optional_ `Config` to use.
 
 ##### returns
 
-- if successful, a `ProfileWrapper` instance.
+- if successful, a `Client` instance.
 
 #### get_user
 
 ```rust
-pub async fn get_user(&mut self, id: String) -> Result<Profile, ProfileError>
+pub async fn get_user(&mut self, id: String) -> Result<Profile, Error>
 ```
 
 fetches a user profile by id.
@@ -54,22 +54,22 @@ fetches a user profile by id.
 
 ##### returns
 
-- `ProfileError::ProfileNotFound` if the profile does not exist (HTTP 404).
-- `ProfileError::RequestFailed` for network or decoding errors.
-- `ProfileError::InvalidId` if the id is not a valid string.
-- `ProfileError::TooManyRequests` if the user has sent too many requests within a short timespan.
+- `Error::ProfileNotFound` if the profile does not exist (HTTP 404).
+- `Error::RequestFailed` for network or decoding errors.
+- `Error::InvalidId` if the id is not a valid string.
+- `Error::TooManyRequests` if the user has sent too many requests within a short timespan.
 - if successful, a `Profile` instance.
 
 ---
 
-## ProfileConfig
+## Config
 
-the configuration for the `ProfileWrapper` struct.
+the configuration for the `Client` struct.
 
 __no configuration is publicly exposed through the struct!__
 
 ```rust
-pub struct ProfileConfig {
+pub struct Config {
     /* private fields */
 }
 ```
@@ -89,7 +89,7 @@ pub fn new(
     client: Option<Client>,
     base_url: Option<String>,
     cache_timeout: Option<u64>,
-) -> ProfileConfig
+) -> Config
 ```
 
 ##### arguments
@@ -101,17 +101,17 @@ pub fn new(
 #### default
 
 ```rust
-pub fn default() -> FriendsConfig
+pub fn default() -> Config
 ```
 
 ---
 
-## ProfileError
+## Error
 
 the list of  errors that can occur when fetching a users profile.
 
 ```rust
-pub enum ProfileError {
+pub enum Error {
     ProfileNotFound(String),
     InvalidId(String),
     TooManyRequests(),
@@ -236,11 +236,11 @@ pub struct Badge {
 
 ---
 
-## CachedProfile
+## CacheEntry
 
 a cached profile entry, containing a profile and its last updated timestamp.
 
-this is used internally by `ProfileCache` to store profile data.
+this is used internally by `Cache` to store profile data.
 
 ### fields
 
@@ -249,14 +249,14 @@ this is used internally by `ProfileCache` to store profile data.
 
 ---
 
-## ProfileCache
+## Cache
 
 a cache of user profiles, keyed by user id.
 
-this is used internally by `ProfileWrapper` to cache profiles.
+this is used internally by `Client` to cache profiles.
 
 ```rust
-pub struct ProfileCache {
+pub struct Cache {
     /* private fields */
 }
 ```
@@ -265,15 +265,15 @@ pub struct ProfileCache {
 
 #### new
 ```rust
-pub fn new(cache_timeout: u64) -> ProfileCache
+pub fn new(cache_timeout: u64) -> Cache
 ```
-creates a new `ProfileCache` with the specified cache timeout.
+creates a new `Cache` with the specified cache timeout.
 
 ##### arguments
   - `cache_timeout` - a `u64` detailing the cache timeout in seconds.
 
 ##### returns
-  - a new `ProfileCache` instance
+  - a new `Cache` instance
 
 #### get
 ```rust

@@ -10,14 +10,14 @@ _this is for searching places by name._ there is currently no known endpoint for
 
 ---
 
-## PlacesWrapper
+## Client
 
 a client for interacting with the luduvo places api.
 
 __the configuration and client aren't publicly exposed through the struct!__
 
 ```rust
-pub struct PlacesWrapper {
+pub struct Client {
     /* private fields */
 }
 ```
@@ -26,19 +26,19 @@ pub struct PlacesWrapper {
 
 #### new
 
-creates a new `PlacesWrapper`.
+creates a new `Client`.
 
 ```rust
-pub fn new(config: Option<PlacesConfig>) -> PlacesWrapper
+pub fn new(config: Option<Config>) -> Client
 ```
 
 ##### arguments
 
-- `config` - an _optional_ `PlacesConfig` to use.
+- `config` - an _optional_ `Config` to use.
 
 ##### returns
 
-- if successful, a `PlacesWrapper` instance.
+- if successful, a `Client` instance.
 
 #### get_places
 
@@ -49,7 +49,7 @@ pub async fn get_places(
     &mut self,
     query: String,
     limit: Option<String>,
-) -> Result<Places, PlacesError>
+) -> Result<Places, Error>
 ```
 
 ##### arguments
@@ -59,21 +59,21 @@ pub async fn get_places(
 
 ##### returns
 
-- `PlacesError::TooManyRequests` if the user has sent too many requests within a short timespan.
-- `PlacesError::RequestFailed` for network or decoding errors.
-- `PlacesError::InternalError` if something went wrong within the luduvo api.
+- `Error::TooManyRequests` if the user has sent too many requests within a short timespan.
+- `Error::RequestFailed` for network or decoding errors.
+- `Error::InternalError` if something went wrong within the luduvo api.
 - if successful, a `Places` instance.
 
 ---
 
-## PlacesConfig
+## Config
 
-the configuration for the `PlacesWrapper` struct.
+the configuration for the `Client` struct.
 
 __no configuration is publicly exposed through the struct!__
 
 ```rust
-pub struct PlacesConfig {
+pub struct Config {
     /* private fields */
 }
 ```
@@ -93,7 +93,7 @@ pub fn new(
     client: Option<Client>,
     base_url: Option<String>,
     cache_timeout: Option<u64>,
-) -> PlacesConfig
+) -> Config
 ```
 
 ##### arguments
@@ -105,17 +105,17 @@ pub fn new(
 #### default
 
 ```rust
-pub fn default() -> PlacesConfig
+pub fn default() -> Config
 ```
 
 ---
 
-## PlacesError
+## Error
 
 the list of errors that can occur when fetching places.
 
 ```rust
-pub enum PlacesError {
+pub enum Error {
     TooManyRequests(),
     RequestFailed(Error),
     InternalError(String),
@@ -193,11 +193,11 @@ pub struct Places {
 
 ---
 
-## CachedPlaces
+## CacheEntry
 
 a cached places entry, containing a `Places` struct and its last updated timestamp.
 
-this is used internally by `PlacesCache` to store place data.
+this is used internally by `Cache` to store place data.
 
 ### fields
 
@@ -206,20 +206,20 @@ this is used internally by `PlacesCache` to store place data.
 
 ---
 
-## PlacesCache
+## Cache
 
 a cache of places, keyed by query string.
 
-this is used internally by `PlacesWrapper` to cache place data.
+this is used internally by `Client` to cache place data.
 
 ### methods
 
 #### new
 
-creates a new `PlacesCache` with the specified cache timeout.
+creates a new `Cache` with the specified cache timeout.
 
 ```rust
-pub fn new(cache_timeout: u64) -> PlacesCache
+pub fn new(cache_timeout: u64) -> Cache
 ```
 
 ##### arguments
@@ -228,7 +228,7 @@ pub fn new(cache_timeout: u64) -> PlacesCache
 
 ##### returns
 
-- a new `PlacesCache` instance.
+- a new `Cache` instance.
 
 #### get
 

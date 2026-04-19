@@ -5,14 +5,14 @@ use wiremock::{
     matchers::{method, path},
 };
 
-fn setup_wrapper(server: &MockServer) -> FriendsWrapper {
+fn setup_wrapper(server: &MockServer) -> FriendsClient {
     let config = FriendsConfig::new(
         None,
         Some(format!("{}/users", server.uri())),
         Some(1)
     );
     
-    FriendsWrapper::new(Some(config))
+    FriendsClient::new(Some(config))
 }
 
 fn mock_profile_body() -> serde_json::Value {
@@ -44,7 +44,7 @@ async fn get_friends_success() {
 
 #[tokio::test]
 async fn get_friends_invalid_id() {
-    let mut wrapper = FriendsWrapper::new(None);
+    let mut wrapper = FriendsClient::new(None);
 
     match wrapper.get_friends("abc".to_string()).await {
         Err(FriendsError::InvalidId(id)) => assert_eq!(id, "abc"),

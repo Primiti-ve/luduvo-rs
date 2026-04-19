@@ -21,12 +21,13 @@ icon: lucide/hammer
     * [x] friends endpoint
     * [x] query endpoint
 - [x] places api
-- [ ] groups api
+- [ ] groups api (awaiting sample data)
+- [ ] tags api (awaiting sample data)
 - [ ] future stuff
 
 ## feature flags
 
-luduvo-rs comes with cargo _feature flags_ so you can pick and choose what features you'd like to use. these features are:
+luduvo-rs comes with _feature flags_ so you can pick and choose what features you'd like to use. these features are:
 
 - `users` - which enables `friends`, `profile`, and `query`
 - `prelude` - which enables the `luduvo_rs::prelude` exports
@@ -35,8 +36,4 @@ luduvo-rs comes with cargo _feature flags_ so you can pick and choose what featu
 - `query` - which enables the `luduvo_rs::users::query` exports
 - `places` - which enables the `luduvo_rs::places` exports
 
-__the features enabled by default are:__
-
-- `users`
-- `prelude`
-- `places`
+all features are enabled by default!

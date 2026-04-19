@@ -6,14 +6,14 @@ use wiremock::{
     Mock, MockServer, ResponseTemplate,
 };
 
-fn setup_wrapper(server: &MockServer) -> PlacesWrapper {
+fn setup_wrapper(server: &MockServer) -> PlacesClient {
     let config = PlacesConfig::new(
         None,
         Some(format!("{}/places", server.uri())),
         Some(1),
     );
 
-    PlacesWrapper::new(Some(config))
+    PlacesClient::new(Some(config))
 }
 
 fn mock_places_body() -> serde_json::Value {

@@ -2,7 +2,7 @@
 //!
 //! this module contains structs related to fetching luduvo place data.
 
-use reqwest::{Client, StatusCode};
+use reqwest::{Client as ReqwestClient, StatusCode};
 use serde::Deserialize;
 use std::{
     collections::HashMap,
@@ -14,7 +14,7 @@ pub const BASE_URL: &str = "https://api.luduvo.com/places";
 
 /// errors that can occur when fetching profiles.
 #[derive(Error, Debug)]
-pub enum PlacesError {
+pub enum Error {
     /// the user has sent too many requests to the api.
     #[error("too many requests")]
     TooManyRequests(),
@@ -65,25 +65,25 @@ pub struct Places {
 
 /// a cached place entry, containing a places struct and its last updated timestamp.
 ///
-/// this is used internally by [`PlacesCache`] to store place data.
+/// this is used internally by [`Cache`] to store place data.
 #[derive(Clone)]
-pub struct CachedPlaces {
+pub struct CacheEntry {
     pub places: Places,
     pub last_updated: u64,
 }
 
 /// a cache of places, keyed by place id.
 ///
-/// this is used internally by [`PlacesWrapper`] to cache place data.
+/// this is used internally by [`Client`] to cache place data.
 #[derive(Clone)]
-pub struct PlacesCache {
-    cache: HashMap<String, CachedPlaces>,
+pub struct Cache {
+    cache: HashMap<String, CacheEntry>,
     cache_timeout: u64,
 }
 
 /// the implementation for the profilecache struct.
-impl PlacesCache {
-    /// creates a new [`PlacesCache`] with the specified cache timeout.
+impl Cache {
+    /// creates a new [`Cache`] with the specified cache timeout.
     ///
     /// # arguments
     ///
@@ -91,7 +91,7 @@ impl PlacesCache {
     ///
     /// # returns
     ///
-    /// - a new [`PlacesCache`] instance
+    /// - a new [`Cache`] instance
     pub fn new(cache_timeout: u64) -> Self {
         Self {
             cache: HashMap::new(),
@@ -139,7 +139,7 @@ impl PlacesCache {
     /// * `id` - the id of the place to insert into the cache.
     /// * `places` - a vec list of the places.
     pub fn insert(&mut self, id: String, places: Places) {
-        let cached = CachedPlaces {
+        let cached = CacheEntry {
             places,
             last_updated: Self::now(),
         };
@@ -157,7 +157,7 @@ impl PlacesCache {
     }
 }
 
-/// the configuration for the [`PlacesWrapper`] struct
+/// the configuration for the [`Client`] struct
 ///
 /// # arguments
 ///
@@ -165,36 +165,40 @@ impl PlacesCache {
 /// * `base_url` - the base url of the api
 /// * `cache_timeout` - the amount of time it takes for cache entries to go stale
 #[derive(Clone)]
-pub struct PlacesConfig {
-    client: Client,
+pub struct Config {
+    client: ReqwestClient,
     base_url: String,
-    cache_timeout: u64
+    cache_timeout: u64,
 }
 
-impl PlacesConfig {
-    pub fn new(client: Option<Client>, base_url: Option<String>, cache_timeout: Option<u64>) -> PlacesConfig {
+impl Config {
+    pub fn new(
+        client: Option<ReqwestClient>,
+        base_url: Option<String>,
+        cache_timeout: Option<u64>,
+    ) -> Config {
         let client = client.unwrap_or_default();
         let base_url = base_url.unwrap_or_default();
         let cache_timeout = cache_timeout.unwrap_or_default();
 
-        PlacesConfig {
+        Config {
             client,
             base_url,
-            cache_timeout
+            cache_timeout,
         }
     }
 }
 
-impl Default for PlacesConfig {
-    fn default() -> PlacesConfig {
-        let client = Client::new();
+impl Default for Config {
+    fn default() -> Config {
+        let client = ReqwestClient::new();
         let base_url = BASE_URL.to_string();
         let cache_timeout = 30_u64;
 
-        PlacesConfig {
+        Config {
             client,
             base_url,
-            cache_timeout
+            cache_timeout,
         }
     }
 }
@@ -203,13 +207,13 @@ impl Default for PlacesConfig {
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
-pub struct PlacesWrapper {
-    config: PlacesConfig,
-    cache: PlacesCache,
+pub struct Client {
+    config: Config,
+    cache: Cache,
 }
 
-impl PlacesWrapper {
-    /// creates a new [`PlacesWrapper`].
+impl Client {
+    /// creates a new [`Client`].
     ///
     /// # notes
     ///
@@ -218,19 +222,16 @@ impl PlacesWrapper {
     ///
     /// # arguments
     ///
-    /// * `config` - the [`PlacesConfig`] to use.
+    /// * `config` - the [`Config`] to use.
     ///
     /// # returns
     ///
-    /// - a new [`PlacesWrapper`] instance if successful
-    pub fn new(config: Option<PlacesConfig>) -> Self {
+    /// - a new [`Client`] instance if successful
+    pub fn new(config: Option<Config>) -> Self {
         let config = config.unwrap_or_default();
-        let cache = PlacesCache::new(config.cache_timeout);
+        let cache = Cache::new(config.cache_timeout);
 
-        Self {
-            config,
-            cache,
-        }
+        Self { config, cache }
     }
 
     /// fetches a list of places by name.
@@ -247,19 +248,19 @@ impl PlacesWrapper {
     /// # errors
     ///
     /// returns:
-    /// - [`PlacesError::RequestFailed`] for network or decoding errors
-    /// - [`PlacesError::TooManyRequests`] if the user has sent too many requests within a short timespan
-    /// - [`PlacesError::InternalError`] if something went wrong within the luduvo api
+    /// - [`Error::RequestFailed`] for network or decoding errors
+    /// - [`Error::TooManyRequests`] if the user has sent too many requests within a short timespan
+    /// - [`Error::InternalError`] if something went wrong within the luduvo api
     /// - [`Places`] if successful
     ///
     /// # example
     ///
     /// ```no_run
-    /// use luduvo_rs::places::PlacesWrapper;
+    /// use luduvo_rs::places::Client;
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let mut wrapper = PlacesWrapper::new(None);
+    ///     let mut wrapper = Client::new(None);
     ///
     ///     match wrapper.get_places("Luduvo".to_string(), None).await {
     ///         Ok(user) => {
@@ -276,7 +277,7 @@ impl PlacesWrapper {
         &mut self,
         query: String,
         limit: Option<String>,
-    ) -> Result<Places, PlacesError> {
+    ) -> Result<Places, Error> {
         if let Some(cached) = self.cache.get(&query) {
             return Ok(cached);
         }
@@ -289,10 +290,10 @@ impl PlacesWrapper {
         let status = response.status();
 
         if status == StatusCode::TOO_MANY_REQUESTS {
-            return Err(PlacesError::TooManyRequests());
+            return Err(Error::TooManyRequests());
         } else if status == StatusCode::INTERNAL_SERVER_ERROR {
             let reason = status.canonical_reason().unwrap_or("no error supplied");
-            return Err(PlacesError::InternalError(reason.to_string()));
+            return Err(Error::InternalError(reason.to_string()));
         }
 
         let response = response.error_for_status()?;

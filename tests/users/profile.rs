@@ -6,14 +6,14 @@ use wiremock::{
     matchers::{method, path},
 };
 
-fn setup_wrapper(server: &MockServer) -> ProfileWrapper {
+fn setup_wrapper(server: &MockServer) -> ProfileClient {
     let config = ProfileConfig::new(
         None,
         Some(format!("{}/users", server.uri())),
         Some(1)
     );
 
-    ProfileWrapper::new(Some(config))
+    ProfileClient::new(Some(config))
 }
 
 fn mock_profile_body() -> serde_json::Value {
@@ -90,7 +90,7 @@ async fn get_profile_not_found() {
 
 #[tokio::test]
 async fn get_profile_invalid_id_format() {
-    let mut wrapper = ProfileWrapper::new(None);
+    let mut wrapper = ProfileClient::new(None);
 
     match wrapper.get_user("abc".to_string()).await {
         Err(ProfileError::InvalidId(id)) => assert_eq!(id, "abc"),

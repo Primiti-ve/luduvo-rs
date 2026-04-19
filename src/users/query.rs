@@ -2,9 +2,9 @@
 //!
 //! this module contains structs related to fetching multiple luduvo users at a time.
 //!
-//! this is for searching users by username. for searching users by id, see the [`profile`] api.
+//! this is for searching multiple users. for searching a single user, use `luduvo_rs::users::profile::Client`.
 
-use reqwest::{Client, StatusCode};
+use reqwest::{Client as ReqwestClient, StatusCode};
 use serde::Deserialize;
 use std::{
     collections::HashMap,
@@ -16,7 +16,7 @@ use super::BASE_URL;
 
 /// errors that can occur when fetching profiles.
 #[derive(Error, Debug)]
-pub enum QueryError {
+pub enum Error {
     /// the user has sent too many requests to the api.
     #[error("too many requests")]
     TooManyRequests(),
@@ -67,25 +67,25 @@ pub struct Query {
 
 /// a cached profile entry, containing a profile and its last updated timestamp.
 ///
-/// this is used internally by [`QueryCache`] to store profile data.
+/// this is used internally by [`Cache`] to store profile data.
 #[derive(Clone)]
-pub struct CachedQuery {
+pub struct CacheEntry {
     pub users: Query,
     pub last_updated: u64,
 }
 
 /// a cache of user profiles, keyed by user id.
 ///
-/// this is used internally by [`QueryWrapper`] to cache profiles.
+/// this is used internally by [`Client`] to cache profiles.
 #[derive(Clone)]
-pub struct QueryCache {
-    cache: HashMap<String, CachedQuery>,
+pub struct Cache {
+    cache: HashMap<String, CacheEntry>,
     cache_timeout: u64,
 }
 
 /// the implementation for the profilecache struct.
-impl QueryCache {
-    /// creates a new [`QueryCache`] with the specified cache timeout.
+impl Cache {
+    /// creates a new [`Cache`] with the specified cache timeout.
     ///
     /// # arguments
     ///
@@ -93,7 +93,7 @@ impl QueryCache {
     ///
     /// # returns
     ///
-    /// - a new [`QueryCache`] instance
+    /// - a new [`Cache`] instance
     pub fn new(cache_timeout: u64) -> Self {
         Self {
             cache: HashMap::new(),
@@ -140,7 +140,7 @@ impl QueryCache {
     ///
     /// * `profile` - the profile to insert.
     pub fn insert(&mut self, query: String, users: Vec<User>) {
-        let cached = CachedQuery {
+        let cached = CacheEntry {
             users: Query { users },
             last_updated: Self::now(),
         };
@@ -158,7 +158,7 @@ impl QueryCache {
     }
 }
 
-/// the configuration for the [`QueryWrapper`] struct
+/// the configuration for the [`Client`] struct
 ///
 /// # arguments
 ///
@@ -166,36 +166,40 @@ impl QueryCache {
 /// * `base_url` - the base url of the api
 /// * `cache_timeout` - the amount of time it takes for cache entries to go stale
 #[derive(Clone)]
-pub struct QueryConfig {
-    client: Client,
+pub struct Config {
+    client: ReqwestClient,
     base_url: String,
-    cache_timeout: u64
+    cache_timeout: u64,
 }
 
-impl QueryConfig {
-    pub fn new(client: Option<Client>, base_url: Option<String>, cache_timeout: Option<u64>) -> QueryConfig {
+impl Config {
+    pub fn new(
+        client: Option<ReqwestClient>,
+        base_url: Option<String>,
+        cache_timeout: Option<u64>,
+    ) -> Config {
         let client = client.unwrap_or_default();
         let base_url = base_url.unwrap_or_default();
         let cache_timeout = cache_timeout.unwrap_or_default();
 
-        QueryConfig {
+        Config {
             client,
             base_url,
-            cache_timeout
+            cache_timeout,
         }
     }
 }
 
-impl Default for QueryConfig {
-    fn default() -> QueryConfig {
-        let client = Client::new();
+impl Default for Config {
+    fn default() -> Config {
+        let client = ReqwestClient::new();
         let base_url = BASE_URL.to_string();
         let cache_timeout = 30_u64;
 
-        QueryConfig {
+        Config {
             client,
             base_url,
-            cache_timeout
+            cache_timeout,
         }
     }
 }
@@ -204,13 +208,13 @@ impl Default for QueryConfig {
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
-pub struct QueryWrapper {
-    config: QueryConfig,
-    cache: QueryCache,
+pub struct Client {
+    config: Config,
+    cache: Cache,
 }
 
-impl QueryWrapper {
-    /// creates a new [`QueryWrapper`].
+impl Client {
+    /// creates a new [`Client`].
     ///
     /// # notes
     ///
@@ -219,19 +223,16 @@ impl QueryWrapper {
     ///
     /// # arguments
     ///
-    /// * `config` - the [`QueryConfig`] to use.
+    /// * `config` - the [`Config`] to use.
     ///
     /// # returns
     ///
-    /// - a new [`QueryWrapper`] instance if successful
-    pub fn new(config: Option<QueryConfig>) -> Self {
+    /// - a new [`Client`] instance if successful
+    pub fn new(config: Option<Config>) -> Self {
         let config = config.unwrap_or_default();
-        let cache = QueryCache::new(config.cache_timeout);
+        let cache = Cache::new(config.cache_timeout);
 
-        Self {
-            config,
-            cache,
-        }
+        Self { config, cache }
     }
 
     /// fetches a user profile by username.
@@ -248,19 +249,19 @@ impl QueryWrapper {
     /// # errors
     ///
     /// returns:
-    /// - [`QueryError::UserNotFound`] if the user does not exist (HTTP 404)
-    /// - [`QueryError::RequestFailed`] for network or decoding errors
-    /// - [`QueryError::TooManyRequests`] if the user has sent too many requests within a short timespan
+    /// - [`Error::UserNotFound`] if the user does not exist (HTTP 404)
+    /// - [`Error::RequestFailed`] for network or decoding errors
+    /// - [`Error::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Query`] if successful
     ///
     /// # example
     ///
     /// ```no_run
-    /// use luduvo_rs::users::query::QueryWrapper;
+    /// use luduvo_rs::users::query::Client;
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let mut wrapper = QueryWrapper::new(None);
+    ///     let mut wrapper = Client::new(None);
     ///
     ///     match wrapper.get_user("Luduvo".to_string(), None).await {
     ///         Ok(user) => {
@@ -273,11 +274,7 @@ impl QueryWrapper {
     ///     }
     /// }
     /// ```
-    pub async fn get_user(
-        &mut self,
-        query: String,
-        limit: Option<String>,
-    ) -> Result<Query, QueryError> {
+    pub async fn get_user(&mut self, query: String, limit: Option<String>) -> Result<Query, Error> {
         if let Some(users) = self.cache.get(&query) {
             return Ok(users);
         }
@@ -290,11 +287,11 @@ impl QueryWrapper {
         let status = response.status();
 
         if status == StatusCode::TOO_MANY_REQUESTS {
-            return Err(QueryError::TooManyRequests());
+            return Err(Error::TooManyRequests());
         } else if status == StatusCode::INTERNAL_SERVER_ERROR {
             let reason = status.canonical_reason().unwrap_or("no error supplied");
 
-            return Err(QueryError::InternalError(reason.to_string()));
+            return Err(Error::InternalError(reason.to_string()));
         }
 
         let response = response.error_for_status()?;

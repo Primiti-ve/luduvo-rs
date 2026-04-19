@@ -4,7 +4,7 @@ icon: lucide/map
 
 # places
 
-these are basic examples for the `PlacesWrapper` struct.
+these are basic examples for the `Client` struct.
 
 all of the examples below are explained using zensical's code annotations feature.
 
@@ -13,13 +13,13 @@ all of the examples below are explained using zensical's code annotations featur
 ## basic usage
 
 ``` rust
-use luduvo_rs::places::PlacesWrapper;
+use luduvo_rs::places::Client;
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = PlacesWrapper::new(None); // (1)!
+    let mut client = Client::new(None); // (1)!
 
-    let places = wrapper
+    let places = client
         .get_places("obby".to_string(), None) // (2)!
         .await
         .unwrap();
@@ -30,21 +30,21 @@ async fn main() {
 }
 ```
 
-1. this is the struct used to fetch multiple places from the luduvo api. the first argument is an _optional_ `PlacesConfig`.
-2. this is an example of how to get places using `PlacesWrapper.get_places`, which takes in a _required_ query (which is a `String`) and an _optional_ limit (which is a `String`), and returns a `Result<Places, PlacesError>`.
+1. this is the struct used to fetch multiple places from the luduvo api. the first argument is an _optional_ `Config`.
+2. this is an example of how to get places using `Client.get_places`, which takes in a _required_ query (which is a `String`) and an _optional_ limit (which is a `String`), and returns a `Result<Places, PlacesError>`.
 
 ---
 
 ## error handling
 
 ``` rust
-use luduvo_rs::places::{PlacesWrapper, PlacesError};
+use luduvo_rs::places::{Client, PlacesError};
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = PlacesWrapper::new(None);
+    let mut client = Client::new(None);
 
-    match wrapper.get_places("test".to_string(), None).await { // (1)!
+    match client.get_places("test".to_string(), None).await { // (1)!
         Ok(result) => println!("found {} places!", result.total),
 
         Err(PlacesError::TooManyRequests()) => { // (2)!
@@ -66,13 +66,13 @@ async fn main() {
 ## inspecting data
 
 ``` rust
-use luduvo_rs::places::PlacesWrapper;
+use luduvo_rs::places::Client;
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = PlacesWrapper::new(None);
+    let mut client = Client::new(None);
 
-    let places = wrapper
+    let places = client
         .get_places("city".to_string(), Some("10".to_string())) // (1)!
         .await
         .unwrap();

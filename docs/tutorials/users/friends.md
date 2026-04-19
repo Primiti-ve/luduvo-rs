@@ -4,7 +4,7 @@ icon: lucide/handshake
 
 # friends
 
-these are basic examples for the `FriendsWrapper` struct.
+these are basic examples for the `Client` struct.
 
 all of the examples below are explained using zensical's code annotations feature.
 
@@ -13,12 +13,12 @@ all of the examples below are explained using zensical's code annotations featur
 ## basic usage
 
 ``` rust
-use luduvo_rs::users::friends::FriendsWrapper;
+use luduvo_rs::users::friends::Client;
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = FriendsWrapper::new(None); // (1)!
-    let friends = wrapper.get_friends("42".to_string()).await.unwrap(); // (2)!
+    let mut client = Client::new(None); // (1)!
+    let friends = client.get_friends("42".to_string()).await.unwrap(); // (2)!
 
     println!("total friends: {}", friends.total);
 
@@ -28,28 +28,28 @@ async fn main() {
 }
 ```
 
-1. this is the struct used to fetch friends data from the luduvo api. the first argument is an _optional_ `FriendsConfig`.
-2. this is an example of how to get friends using `FriendsWrapper.get_friends`, which takes in a `String` and returns a `Result<Friends, FriendsError>`.
+1. this is the struct used to fetch friends data from the luduvo api. the first argument is an _optional_ `Config`.
+2. this is an example of how to get friends using `Client.get_friends`, which takes in a `String` and returns a `Result<Friends, Error>`.
 
 ---
 
 ## error handling
 
 ``` rust
-use luduvo_rs::users::friends::{FriendsWrapper, FriendsError};
+use luduvo_rs::users::friends::{Client, Error};
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = FriendsWrapper::new(None);
+    let mut client = Client::new(None);
 
-    match wrapper.get_friends("invalid_id".to_string()).await { // (1)!
+    match client.get_friends("invalid_id".to_string()).await { // (1)!
         Ok(_) => println!("unexpected success"),
 
-        Err(FriendsError::InvalidId(id)) => { // (2)!
+        Err(Error::InvalidId(id)) => { // (2)!
             eprintln!("invalid id provided: {}", id);
         }
 
-        Err(FriendsError::TooManyRequests()) => { // (3)!
+        Err(Error::TooManyRequests()) => { // (3)!
             eprintln!("rate limited!! try again later");
         }
 
@@ -60,7 +60,7 @@ async fn main() {
 }
 ```
 
-1. this is an invalid example of how to get friends using `FriendsWrapper.get_friends`. this will __always fail__ and return a `FriendsError`.
+1. this is an invalid example of how to get friends using `Client.get_friends`. this will __always fail__ and return a `Error`.
 2. this error is thrown when the id is not found in the luduvo database.
 3. this error is thrown when the luduvo api returns a `429 Too Many Requests` error, indicating the user is ratelimited.
 
@@ -69,17 +69,17 @@ async fn main() {
 ## cache behaviour
 
 ``` rust
-use luduvo_rs::users::friends::FriendsWrapper;
+use luduvo_rs::users::friends::Client;
 
 #[tokio::main]
 async fn main() {
-    let mut wrapper = FriendsWrapper::new(None);
+    let mut client = Client::new(None);
     
-    let _ = wrapper.get_friends("1".to_string()).await.unwrap();
-    let cached = wrapper.get_friends("1".to_string()).await.unwrap(); // (1)!
+    let _ = client.get_friends("1".to_string()).await.unwrap();
+    let cached = client.get_friends("1".to_string()).await.unwrap(); // (1)!
 
     println!("cached friends count: {}", cached.total);
 }
 ```
 
-1. this shows the caching in place for the `FriendsWrapper`. the cache is not publicly exposed.
+1. this shows the caching in place for the `Client`. the cache is not publicly exposed.

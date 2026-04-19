@@ -11,9 +11,9 @@ this module re-exports commonly used structs in luduvo-rs.
 instead of importing individual types/structs like:
 
 ```rust
-use luduvo_rs::users::profile::{Profile, ProfileWrapper};
-use luduvo_rs::users::friends::{Friends, FriendsWrapper};
-use luduvo_rs::places::{Places, PlacesWrapper};
+use luduvo_rs::users::profile::{Profile, Client};
+use luduvo_rs::users::friends::{Friends, Client};
+use luduvo_rs::places::{Places, Client};
 ```
 
 you can simply do:
@@ -29,17 +29,17 @@ this is especially useful in small scripts, examples, or when you are using mult
 ### profile api
 
 - `Profile`
-- `ProfileWrapper`
-- `ProfileError`
+- `Client`
+- `Error`
 
 ### friends api
 
 - `Friends`
-- `FriendsWrapper`
-- `FriendsError`
+- `Client`
+- `Error`
 
 ### query api
 
 - `Query`
-- `QueryWrapper`
-- `QueryError`
+- `Client`
+- `Error`

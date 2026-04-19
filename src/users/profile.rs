@@ -1,10 +1,10 @@
 //! # profile api
 //!
-//! this module contains structs related to fetching a single luduvo user at once.
+//! this module contains structs related to fetching a single luduvo user at once, *by id*.
 //!
-//! this is for searching users by id. for searching users by username, use a [`QueryWrapper`] with a limit of 1.
+//! this is for searching a single user. for searching multiple users, use `luduvo_rs::users::query::Client`.
 
-use reqwest::{Client, StatusCode};
+use reqwest::{Client as ReqwestClient, StatusCode};
 use serde::Deserialize;
 use std::{
     collections::HashMap,
@@ -16,7 +16,7 @@ use super::BASE_URL;
 
 /// errors that can occur when fetching a profile.
 #[derive(Error, Debug)]
-pub enum ProfileError {
+pub enum Error {
     /// the profile with the specified id was not found.
     #[error("profile with id `{0}` not found")]
     ProfileNotFound(String),
@@ -136,25 +136,25 @@ pub struct Profile {
 
 /// a cached profile entry, containing a profile and its last updated timestamp.
 ///
-/// this is used internally by [`ProfileCache`] to store profile data.
+/// this is used internally by [`Cache`] to store profile data.
 #[derive(Clone)]
-pub struct CachedProfile {
+pub struct CacheEntry {
     pub profile: Profile,
     pub last_updated: u64,
 }
 
 /// a cache of user profiles, keyed by user id.
 ///
-/// this is used internally by [`ProfileWrapper`] to cache profiles.
+/// this is used internally by [`Client`] to cache profiles.
 #[derive(Clone)]
-pub struct ProfileCache {
-    cache: HashMap<u64, CachedProfile>,
+pub struct Cache {
+    cache: HashMap<u64, CacheEntry>,
     cache_timeout: u64,
 }
 
-/// the implementation for the profilecache struct.
-impl ProfileCache {
-    /// creates a new [`ProfileCache`] with the specified cache timeout.
+/// the implementation for the Cache struct.
+impl Cache {
+    /// creates a new [`Cache`] with the specified cache timeout.
     ///
     /// # arguments
     ///
@@ -162,7 +162,7 @@ impl ProfileCache {
     ///
     /// # returns
     ///
-    /// - a new [`ProfileCache`] instance
+    /// - a new [`Cache`] instance
     pub fn new(cache_timeout: u64) -> Self {
         Self {
             cache: HashMap::new(),
@@ -210,7 +210,7 @@ impl ProfileCache {
     /// * `profile` - the profile to insert.
     pub fn insert(&mut self, profile: Profile) {
         let id = profile.user_id;
-        let cached = CachedProfile {
+        let cached = CacheEntry {
             profile,
             last_updated: Self::now(),
         };
@@ -228,44 +228,48 @@ impl ProfileCache {
     }
 }
 
-/// the configuration for the [`ProfileWrapper`] struct
-/// 
+/// the configuration for the [`Client`] struct
+///
 /// # arguments
-/// 
+///
 /// * `client` - the [`reqwest::Client`] to use
 /// * `base_url` - the base url of the api
 /// * `cache_timeout` - the amount of time it takes for cache entries to go stale
 #[derive(Clone)]
-pub struct ProfileConfig {
-    client: Client,
+pub struct Config {
+    client: ReqwestClient,
     base_url: String,
-    cache_timeout: u64
+    cache_timeout: u64,
 }
 
-impl ProfileConfig {
-    pub fn new(client: Option<Client>, base_url: Option<String>, cache_timeout: Option<u64>) -> ProfileConfig {
+impl Config {
+    pub fn new(
+        client: Option<ReqwestClient>,
+        base_url: Option<String>,
+        cache_timeout: Option<u64>,
+    ) -> Config {
         let client = client.unwrap_or_default();
         let base_url = base_url.unwrap_or_default();
         let cache_timeout = cache_timeout.unwrap_or_default();
-        
-        ProfileConfig {
+
+        Config {
             client,
             base_url,
-            cache_timeout
+            cache_timeout,
         }
     }
 }
 
-impl Default for ProfileConfig {
-    fn default() -> ProfileConfig {
-        let client = Client::new();
+impl Default for Config {
+    fn default() -> Config {
+        let client = ReqwestClient::new();
         let base_url = BASE_URL.to_string();
         let cache_timeout = 30_u64;
-        
-        ProfileConfig {
+
+        Config {
             client,
             base_url,
-            cache_timeout
+            cache_timeout,
         }
     }
 }
@@ -274,13 +278,13 @@ impl Default for ProfileConfig {
 ///
 /// this struct internally initializes a reusable [`reqwest::Client`] to perform HTTP requests.
 #[derive(Clone)]
-pub struct ProfileWrapper {
-    config: ProfileConfig,
-    cache: ProfileCache,
+pub struct Client {
+    config: Config,
+    cache: Cache,
 }
 
-impl ProfileWrapper {
-    /// creates a new [`ProfileWrapper`].
+impl Client {
+    /// creates a new [`Client`].
     ///
     /// # notes
     ///
@@ -289,19 +293,16 @@ impl ProfileWrapper {
     ///
     /// # arguments
     ///
-    /// * `config` - the [`ProfileConfig`] to use.
+    /// * `config` - the [`Config`] to use.
     ///
     /// # returns
     ///
-    /// - a new [`ProfileWrapper`] instance if successful
-    pub fn new(config: Option<ProfileConfig>) -> Self {
+    /// - a new [`Client`] instance if successful
+    pub fn new(config: Option<Config>) -> Self {
         let config = config.unwrap_or_default();
-        let cache = ProfileCache::new(config.cache_timeout);
+        let cache = Cache::new(config.cache_timeout);
 
-        Self {
-            config,
-            cache,
-        }
+        Self { config, cache }
     }
 
     /// fetches a user profile by id.
@@ -317,20 +318,20 @@ impl ProfileWrapper {
     /// # errors
     ///
     /// returns:
-    /// - [`ProfileError::ProfileNotFound`] if the profile does not exist (HTTP 404)
-    /// - [`ProfileError::RequestFailed`] for network or decoding errors
-    /// - [`ProfileError::InvalidId`] if the id is not a valid string
-    /// - [`ProfileError::TooManyRequests`] if the user has sent too many requests within a short timespan
+    /// - [`Error::ProfileNotFound`] if the profile does not exist (HTTP 404)
+    /// - [`Error::RequestFailed`] for network or decoding errors
+    /// - [`Error::InvalidId`] if the id is not a valid string
+    /// - [`Error::TooManyRequests`] if the user has sent too many requests within a short timespan
     /// - [`Profile`] if successful
     ///
     /// # example
     ///
     /// ```no_run
-    /// use luduvo_rs::users::profile::ProfileWrapper;
+    /// use luduvo_rs::users::profile::Client;
     ///
     /// #[tokio::main]
     /// async fn main() {
-    ///     let mut wrapper = ProfileWrapper::new(None);
+    ///     let mut wrapper = Client::new(None);
     ///
     ///     match wrapper.get_user("1".to_string()).await {
     ///         Ok(profile) => {
@@ -343,10 +344,8 @@ impl ProfileWrapper {
     ///     }
     /// }
     /// ```
-    pub async fn get_user(&mut self, id: String) -> Result<Profile, ProfileError> {
-        let id_num: u64 = id
-            .parse()
-            .map_err(|_| ProfileError::InvalidId(id.clone()))?;
+    pub async fn get_user(&mut self, id: String) -> Result<Profile, Error> {
+        let id_num: u64 = id.parse().map_err(|_| Error::InvalidId(id.clone()))?;
 
         if let Some(profile) = self.cache.get(id_num) {
             return Ok(profile);
@@ -358,13 +357,13 @@ impl ProfileWrapper {
         let status = response.status();
 
         if status == StatusCode::NOT_FOUND {
-            return Err(ProfileError::ProfileNotFound(id));
+            return Err(Error::ProfileNotFound(id));
         } else if status == StatusCode::TOO_MANY_REQUESTS {
-            return Err(ProfileError::TooManyRequests());
+            return Err(Error::TooManyRequests());
         } else if status == StatusCode::INTERNAL_SERVER_ERROR {
             let reason = status.canonical_reason().unwrap_or("no error supplied");
 
-            return Err(ProfileError::InternalError(reason.to_string()));
+            return Err(Error::InternalError(reason.to_string()));
         }
 
         let response = response.error_for_status()?;
