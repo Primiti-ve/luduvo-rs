@@ -5,7 +5,7 @@ icon: lucide/braces
 # home
 
 <p align="center">
-  <img src="https://github.com/Primiti-ve/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs wordmark" width="450"/>
+  <img src="https://github.com/luduvo-devhub/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs wordmark" width="450"/>
 </p>
 
 <p align="center">

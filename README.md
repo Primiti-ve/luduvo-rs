@@ -1,16 +1,16 @@
 <p align="center">
-  <img src="https://github.com/Primiti-ve/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs wordmark" height="256"/>
+  <img src="https://github.com/luduvo-devhub/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs wordmark" height="256"/>
 </p>
+
+<p align="center">
+  <a href="https://luduvo-devhub.github.io/luduvo-rs">docs</a> | <a href="https://crates.io/crates/luduvo-rs">crates.io</a> | <a href="https://discord.gg/FcjTvuWKRk">luduvo development hub</a>
+</p>
+
+---
 
 <p align="center">
   <i>luduvo-rs</i> is a rust library designed for interacting with the [luduvo](luduvo.com) api.
 </p>
-
-<p align="center">
-  <a href="https://primiti-ve.github.io/luduvo-rs">docs</a> | <a href="https://crates.io/crates/luduvo-rs">crates.io</a> | <a href="https://discord.gg/FcjTvuWKRk">luduvo development hub</a>
-</p>
-
----
 
 > [!WARNING]
 > this crate is completely fanmade and has no affiliation with the luduvo devs.
@@ -51,10 +51,10 @@ async fn main() {
 > [!NOTE]
 > this crate is MIT-licensed. feel free to do whatever with it! all contributions (pull requests, issues) are welcomed, including to the docs.
 
-- [Eeviika](https://github.com/Eeviika) for [#1](https://github.com/Primiti-ve/luduvo-rs/pull/1) (Small changes)
+- [Eeviika](https://github.com/Eeviika) for [#1](https://github.com/luduvo-devhub/luduvo-rs/pull/1) (Small changes)
 
 ## need help?
 
 - contact me on discord! my discord username is `@primiti_ve`.
     - my preferred method of communication is joining the [luduvo development hub](https://discord.gg/FcjTvuWKRk)! it's full of like-minded developers who will gladly help you out with any issues.
-- [create an issue](https://github.com/Primiti-ve/luduvo-rs/issues)! this is better for organisation purposes, although you should also join the luduvo development hub aswell.
+- [create an issue](https://github.com/luduvo-devhub/luduvo-rs/issues)! this is better for organisation purposes, although you should also join the luduvo development hub aswell.

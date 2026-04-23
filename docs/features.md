@@ -23,6 +23,7 @@ icon: lucide/hammer
 - [x] places api
 - [ ] groups api (awaiting sample data)
 - [ ] tags api (awaiting sample data)
+- [ ] store api (awaiting sample data)
 - [ ] future stuff
 
 ## feature flags
