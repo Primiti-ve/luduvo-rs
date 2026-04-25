@@ -1,3 +1,10 @@
+> [!CAUTION]
+> this crate has been deprecated!
+>
+> you should use the <a href="https://github.com/luduvo-devhub/luduvo-rs">new luduvo-rs</a> crate instead! this repository will stay up for legacy purposes.
+
+---
+
 <p align="center">
   <img src="https://github.com/luduvo-devhub/luduvo-rs/blob/main/gh-assets/wordmark.png?raw=true" alt="luduvo-rs wordmark" height="256"/>
 </p>
